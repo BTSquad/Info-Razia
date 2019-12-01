@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+       <ScrollView
+           android:layout_width="match_parent"
+           android:layout_height="match_parent">
+
+        <LinearLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:layout_margin="10dp"
+            android:id="@+id/toolBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.."
+            android:elevation="1dp"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            android:background="@drawable/bg_toolbar">
+
+<!--            <EditText-->
+<!--                android:layout_marginRight="15dp"-->
+<!--                android:paddingLeft="5dp"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="40dp"-->
+<!--                android:background="@drawable/bg_field"-->
+<!--                android:textColor="@color/primaryTextColor"-->
+<!--                android:elevation="3dp"-->
+<!--                android:hint="Cari Lokasi"/>-->
+
+
+        </androidx.appcompat.widget.Toolbar>
+
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/frame_layout">
+
+        </FrameLayout>
+
+        </LinearLayout>
+
+       </ScrollView>
+
+    </RelativeLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/shortCut_lapor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
+        android:src="@drawable/ic_camera_big"
+        app:maxImageSize="30dp"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

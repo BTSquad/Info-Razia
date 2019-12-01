@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">Info Razia</string>
+    <string name="email">Email Anda</string>
+    <string name="kataSandi">Kata Sandi</string>
+    <string name="konfirmasi">Konfirmasi Kata Sandi</string>
+    <string name="close">close</string>
+    <string name="open">open</string>
+
+    <string name="facebook_app_id">2386283521699944</string>
+    <string name="fb_login_protocol_scheme">fb2386283521699944</string>
+
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="pasal22">Berdasarkan Undang-Undang Nomor 22 Tahun 2009 tentang Lalu Lintas dan Angkutan Jalan, yang disahkan DPR pada 22 Juni 2009. Berikut daftar tilang untuk kendaraan bermotor terhadap pelanggaran lalu lintas, seperti dikutip dari situs web Polri.</string>
+    <string name="pasal1">1. Setiap pengendara kendaraan bermotor yang tidak memiliki SIM dipidana dengan pidana kurungan paling lama 4 bulan atau denda paling banyak Rp1 juta (Pasal 281). </string>
+    <string name="pasal2">2. Setiap pengendara kendaraan bermotor yang memiliki SIM namun tak dapat menunjukkannya saat razia dipidana dengan pidana kurungan paling lama 1 bulan atau denda paling banyak Rp250 ribu (Pasal 288 ayat 2). </string>
+    <string name="pasal3">3. Setiap pengendara kendaraan bermotor yang tak dipasangi Tanda Nomor Kendaraan dipidana dengan pidana kurungan paling lama 2 bulan atau denda paling banyak Rp500 ribu (Pasal 280).</string>
+    <string name="pasal4">4. Setiap pengendara sepeda motor yang tidak memenuhi persyaratan teknis dan laik jalan seperti spion, lampu utama, lampu rem, klakson, pengukur kecepatan, dan knalpot dipidana dengan pidana kurungan paling lama 1 bulan atau denda paling banyak Rp250 ribu (Pasal 285 ayat 1). </string>
+    <string name="pasal5">5. Setiap pengendara mobil yang tidak memenuhi persyaratan teknis seperti spion, klakson, lampu utama, lampu mundur, lampu rem, kaca depan, bumper, penghapus kaca dipidana dengan pidana kurungan paling lama 2 bulan atau denda paling banyak Rp500 ribu (Pasal 285 ayat 2). </string>
+    <string name="pasal6">6. Setiap pengendara mobil yang tidak dilengkapi dengan perlengkapan berupa ban cadangan, segitiga pengaman, dongkrak, pembuka roda, dan peralatan pertolongan pertama pada kecelakaan dipidana dengan pidana kurungan paling lama 1 bulan atau denda paling banyak Rp250 ribu (Pasal 278). </string>
+    <string name="pasal7">7. Setiap pengendara yang melanggar rambu lalu lintas dipidana dengan pidana kurungan paling lama 2 bulan atau denda paling banyak Rp500 ribu (Pasal 287 ayat 1).</string>
+    <string name="pasal8">8. Setiap pengendara yang melanggar aturan batas kecepatan paling tinggi atau paling rendah dipidana dengan pidana kurungan paling lama 2 bulan atau denda paling banyak Rp500 ribu (Pasal 287 ayat 5).</string>
+    <string name="pasal9">9. Setiap pengendara yang tidak dilengkapi Surat Tanda Nomor Kendaraan Bermotor atau Surat Tanda Coba Kendaraan Bermotor dipidana dengan pidana kurungan paling lama 2 bulan atau denda paling banyak Rp500 ribu (Pasal 288 ayat 1).</string>
+    <string name="pasal10">10. Setiap pengemudi atau penumpang yang duduk disamping pengemudi mobil tak mengenakan sabuk keselamatan dipidana dengan pidana kurungan paling lama 1 bulan atau denda paling banyak Rp250 ribu (Pasal 289).</string>
+</resources>

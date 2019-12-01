@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "31786650123",
+    "firebase_url": "https://info-razia.firebaseio.com",
+    "project_id": "info-razia",
+    "storage_bucket": "info-razia.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:31786650123:android:1ff0a57635ed1a07f4d50e",
+        "android_client_info": {
+          "package_name": "tim.bts.inforazia"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "31786650123-hu17uvdk3f6491mmbol4gt4umpe07njn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tim.bts.inforazia",
+            "certificate_hash": "d629627f13c2fa53c2a8cc21a2fe95e9b6670fa9"
+          }
+        },
+        {
+          "client_id": "31786650123-mim658l8t1lnhr0lalo3h5kka7mf415m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tim.bts.inforazia",
+            "certificate_hash": "28d579819a7a5abb3c583d01223fbba96da5ed9b"
+          }
+        },
+        {
+          "client_id": "31786650123-76000b7cai3eq0l8qe7pn96g8see59mr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKkXy8Y8pgkRI5s5cO6pe8oNEZS3Jup9s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "31786650123-46k1isn25msikpl5g7pratue318cg3dl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

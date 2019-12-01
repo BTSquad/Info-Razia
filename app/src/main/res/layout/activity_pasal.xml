@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".view.PasalActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <include layout="@layout/toolbar_back"/>
+
+                <ImageView
+                    android:layout_marginTop="15dp"
+                    android:layout_gravity="center"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:src="@drawable/garuda_pancasila"/>
+
+                <TextView
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pasal-Pasal"
+                    android:textStyle="bold"
+                    android:textSize="24dp"
+                    android:textColor="@color/primaryTextColor"/>
+
+                <TextView
+                    android:padding="10dp"
+                    android:gravity="center"
+                    android:layout_marginTop="15dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pasal22"
+                    android:textSize="14dp"
+                    android:textColor="@color/primaryTextColor"/>
+
+                <TextView
+                    android:padding="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pasal1"
+                    android:textSize="14dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/primaryTextColor"/>
+
+                <TextView
+                    android:padding="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pasal2"
+                    android:textSize="14dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/primaryTextColor"/>
+
+                <TextView
+                    android:padding="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pasal3"
+                    android:textSize="14dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/primaryTextColor"/>
+
+                <TextView
+                    android:padding="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pasal4"
+                    android:textSize="14dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/primaryTextColor"/>
+
+                <TextView
+                    android:padding="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pasal5"
+                    android:textSize="14dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/primaryTextColor"/>
+
+                <TextView
+                    android:padding="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pasal6"
+                    android:textSize="14dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/primaryTextColor"/>
+
+                <TextView
+                    android:padding="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pasal7"
+                    android:textSize="14dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/primaryTextColor"/>
+
+                <TextView
+                    android:padding="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pasal8"
+                    android:textSize="14dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/primaryTextColor"/>
+
+                <TextView
+                    android:padding="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pasal9"
+                    android:textSize="14dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/primaryTextColor"/>
+
+                <TextView
+                    android:padding="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pasal10"
+                    android:textSize="14dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/primaryTextColor"/>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </RelativeLayout>
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
