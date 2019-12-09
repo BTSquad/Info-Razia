@@ -23,4 +23,6 @@
     <string name="pasal8">8. Setiap pengendara yang melanggar aturan batas kecepatan paling tinggi atau paling rendah dipidana dengan pidana kurungan paling lama 2 bulan atau denda paling banyak Rp500 ribu (Pasal 287 ayat 5).</string>
     <string name="pasal9">9. Setiap pengendara yang tidak dilengkapi Surat Tanda Nomor Kendaraan Bermotor atau Surat Tanda Coba Kendaraan Bermotor dipidana dengan pidana kurungan paling lama 2 bulan atau denda paling banyak Rp500 ribu (Pasal 288 ayat 1).</string>
     <string name="pasal10">10. Setiap pengemudi atau penumpang yang duduk disamping pengemudi mobil tak mengenakan sabuk keselamatan dipidana dengan pidana kurungan paling lama 1 bulan atau denda paling banyak Rp250 ribu (Pasal 289).</string>
+    <string name="channel_name">name</string>
+    <string name="channel_description">deskripsi</string>
 </resources>

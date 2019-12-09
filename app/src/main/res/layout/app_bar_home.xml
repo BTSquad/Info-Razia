@@ -25,14 +25,14 @@
         android:orientation="vertical">
 
         <androidx.appcompat.widget.Toolbar
-            android:layout_margin="10dp"
+
             android:id="@+id/toolBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.."
+            android:theme="@style/ThemeOverlay.AppCompat.Dark"
             android:elevation="1dp"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            android:background="@drawable/bg_toolbar">
+            android:background="@color/primaryDarkColor">
 
 <!--            <EditText-->
 <!--                android:layout_marginRight="15dp"-->

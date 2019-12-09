@@ -23,6 +23,7 @@ import com.smarteist.autoimageslider.SliderView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import tim.bts.inforazia.R;
@@ -87,10 +88,15 @@ public class DetailRaziaActivity extends AppCompatActivity {
                 for (DataSnapshot ds : dataSnapshot.getChildren())
                 {
                     Upload_model upload_model = ds.getValue(Upload_model.class);
+
+
+
                     urlList.add(upload_model);
 
+
+
                     Log.d(TAG, "Value :"+ upload_model.getmImageUrl());
-                    succses();
+                    setDetail();
 
                 }
 
@@ -122,7 +128,7 @@ public class DetailRaziaActivity extends AppCompatActivity {
 
     }
 
-    private void succses(){
+    private void setDetail(){
 
         ImageSliderAdapter adapter = new ImageSliderAdapter(this, dataUpload_models, urlList);
         sliderView.setSliderAdapter(adapter);

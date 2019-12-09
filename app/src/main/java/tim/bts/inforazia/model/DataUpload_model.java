@@ -11,6 +11,7 @@ public class DataUpload_model {
     private String namaUser;
     private String photoUrlUser;
     private String idUpload;
+    private String counter;
 
 
     public DataUpload_model() {
@@ -18,16 +19,7 @@ public class DataUpload_model {
     }
 
 
-    public DataUpload_model(String alamat,
-                            String deskripsi,
-                            String tanggal,
-                            String waktu,
-                            String mImageUrl,
-                            String UID,
-                            String namaUser,
-                            String photoUrlUser,
-                            String idUpload)
-    {
+    public DataUpload_model(String alamat, String deskripsi, String tanggal, String waktu, String mImageUrl, String UID, String namaUser, String photoUrlUser, String idUpload, String counter) {
         this.alamat = alamat;
         this.deskripsi = deskripsi;
         this.tanggal = tanggal;
@@ -37,8 +29,8 @@ public class DataUpload_model {
         this.namaUser = namaUser;
         this.photoUrlUser = photoUrlUser;
         this.idUpload = idUpload;
+        this.counter = counter;
     }
-
 
     public String getIdUpload() {
         return idUpload;
@@ -112,4 +104,11 @@ public class DataUpload_model {
         this.waktu = waktu;
     }
 
+    public String getCounter() {
+        return counter;
+    }
+
+    public void setCounter(String counter) {
+        this.counter = counter;
+    }
 }

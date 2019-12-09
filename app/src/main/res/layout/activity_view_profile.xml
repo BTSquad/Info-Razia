@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".view.ViewProfileActivity">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/imageUserViewProfile"
+        android:layout_marginTop="125dp"
+        android:layout_centerHorizontal="true"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:src="@drawable/ic_user_24dp"
+        app:civ_border_width="6dp"
+        app:civ_border_color="@color/secondaryLightColor"
+        android:elevation="1dp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include layout="@layout/toolbar_back"/>
+
+            <ImageView
+
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:src="@drawable/background_gradient"/>
+
+
+            <TextView
+                android:id="@+id/namaUserViewProfile"
+                android:layout_marginTop="100dp"
+                android:gravity="center_horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                android:textColor="@color/primaryTextColor"
+                android:text="Username"/>
+
+            <TextView
+                android:id="@+id/emailUserViewProfile"
+                android:layout_marginTop="10dp"
+                android:gravity="center_horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                android:textColor="@color/primaryTextColor"
+                android:text="Email"/>
+
+
+
+
+        </LinearLayout>
+
+
+
+    </ScrollView>
+
+</RelativeLayout>

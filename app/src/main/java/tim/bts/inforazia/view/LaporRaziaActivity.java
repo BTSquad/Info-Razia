@@ -4,24 +4,31 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
-import android.content.Context;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
@@ -36,28 +43,30 @@ import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
-import java.io.ByteArrayOutputStream;
+import com.squareup.picasso.Target;
+
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -68,7 +77,6 @@ import tim.bts.inforazia.model.DataUpload_model;
 import tim.bts.inforazia.model.Upload_model;
 
 public class LaporRaziaActivity extends AppCompatActivity {
-
 
     private ImageView back_btn;
     private Uri imageUri;
@@ -98,10 +106,11 @@ public class LaporRaziaActivity extends AppCompatActivity {
     private StorageReference firebaseStorage;
 
     private DatabaseReference databaseReference;
-    private DatabaseReference inputDb;
     private DatabaseReference inputDetail;
     private ProgressDialog progressDialog;
-    long maxid_post, maxid_detailPost ;
+    private long maxid_post = 1 ;
+    private String CHANNEL_ID = "Info Razia";
+    int notificationId = 001;
 
 
 
@@ -109,6 +118,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lapor_razia);
+
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Proses upload silahkan tunggu");
@@ -119,27 +129,10 @@ public class LaporRaziaActivity extends AppCompatActivity {
         firebaseUser = firebaseAuth.getCurrentUser();
         String UidUser = firebaseUser.getUid();
 
-        databaseReference = FirebaseDatabase.getInstance().getReference().child("viewPost").child(UidUser);
+        databaseReference = FirebaseDatabase.getInstance().getReference().child("viewPost");
         inputDetail = FirebaseDatabase.getInstance().getReference().child("detailPost").child(UidUser);
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                if(dataSnapshot.exists())
-                {
-                    maxid_post = dataSnapshot.getChildrenCount() ;
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
         firebaseStorage = FirebaseStorage.getInstance().getReference();
-
 
         upload = findViewById(R.id.upload_gambar_btn);
         gambar = findViewById(R.id.gambarSet);
@@ -153,7 +146,6 @@ public class LaporRaziaActivity extends AppCompatActivity {
         editLokasi = findViewById(R.id.field_lokasi);
 
         progressBar.setVisibility(View.INVISIBLE);
-
 
         fileDonelist = new ArrayList<>();
         fileUriList = new ArrayList<>();
@@ -190,6 +182,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
             public void onClick(View v) {
                 progressBar.setVisibility(View.VISIBLE);
                 fetchlocation();
+
             }
         });
 
@@ -232,7 +225,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
                     editLokasi.setError("Silahkan Berikan lokasi Anda");
                 }else {
 
-                //    laporRazia();
+
                 uploadGambar();
                 }
 
@@ -247,8 +240,6 @@ public class LaporRaziaActivity extends AppCompatActivity {
         pickImage(requestCode,resultCode,data);
 
     }
-
-
 
     private void pickImage(int requestCode, int resultCode, Intent data)
     {
@@ -339,16 +330,40 @@ public class LaporRaziaActivity extends AppCompatActivity {
     {
         progressDialog.show();
 
-        final String uploadId = databaseReference.push().getKey();
-        final DatabaseReference simpanDetail = inputDetail.child(uploadId);
+        Query getLastCounter = databaseReference.orderByKey().limitToLast(1);
 
-            for (int upload_count = 0; upload_count < fileUriList.size(); upload_count++){
+        getLastCounter.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot ds : dataSnapshot.getChildren())
+                {
+
+                    maxid_post = Long.parseLong(ds.getKey()) + 1;
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+        final String uploadId = databaseReference.push().getKey();
+
+        int upload_count;
+            for (upload_count = 0; upload_count < fileUriList.size(); upload_count++){
 
                 imageUri = fileUriList.get(upload_count);
                 namaFileUpload = getFileName(imageUri);
 
-                inputDb = databaseReference.child(String.valueOf(maxid_post + 1));
+
                 final StorageReference fileToupload = firebaseStorage.child("LaporRaziaImage").child(namaFileUpload);
+
+                final int finalUpload_count = upload_count;
 
                 fileToupload.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -360,35 +375,42 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
                                 final String url = String.valueOf(uri);
 
-
-                                String alamat = editLokasi.getText().toString().trim();
+                                final String alamat = editLokasi.getText().toString().trim();
                                 String deskripsi = deskripsiPost.getText().toString().trim();
                                 String tanggal = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
                                 String waktu = new SimpleDateFormat("HH-mm-ss", Locale.getDefault()).format(new Date());
                                 firebaseAuth = FirebaseAuth.getInstance();
                                 firebaseUser = firebaseAuth.getCurrentUser();
                                 String UidUser = firebaseUser.getUid();
-                                String userName = firebaseUser.getDisplayName();
+                                final String userName = firebaseUser.getDisplayName();
                                 String photoUrl = firebaseUser.getPhotoUrl().toString();
 
-                                DataUpload_model data = new DataUpload_model(alamat, deskripsi, tanggal, waktu, url, UidUser, userName, photoUrl, uploadId);
+                                DataUpload_model data = new DataUpload_model(alamat, deskripsi, tanggal,
+                                        waktu, url, UidUser, userName, photoUrl,
+                                        uploadId, String.valueOf(maxid_post));
 
-                                inputDb.setValue(data)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Upload_model upload_model = new Upload_model(url);
-                                                simpanDetail.push().setValue(upload_model);
+                                if (finalUpload_count < 1) {
 
-                                                Toast.makeText(LaporRaziaActivity.this, "Upload Berhasil", Toast.LENGTH_SHORT).show();
-                                                progressDialog.dismiss();
-                                                fileUriList.clear();
+                                    databaseReference.child(String.valueOf(maxid_post)).setValue(data);
+                                }
 
-                                                Intent intent = new Intent(LaporRaziaActivity.this, HomeActivity.class);
-                                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                startActivity(intent);
-                                            }
-                                        });
+                                final DatabaseReference simpanDetail = inputDetail.child(uploadId);
+
+                                Upload_model upload_model = new Upload_model(url);
+                                simpanDetail.push().setValue(upload_model).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Toast.makeText(LaporRaziaActivity.this, "Upload Berhasil", Toast.LENGTH_SHORT).show();
+                                        progressDialog.dismiss();
+                                        fileUriList.clear();
+
+                                        sendNotif(userName, url, alamat);
+                                        Intent intent = new Intent(LaporRaziaActivity.this, HomeActivity.class);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        startActivity(intent);
+
+                                    }
+                                });
 
                             }
                         });
@@ -404,6 +426,48 @@ public class LaporRaziaActivity extends AppCompatActivity {
             }
 
     }
+
+    private void sendNotif(String namaUser , String url, String alamat){
+        createNotificationChannel();
+
+        Intent intent = new Intent(this, HomeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.pop_up_logo)
+                .setColor(ContextCompat.getColor(this, R.color.primaryColor))
+                .setContentTitle(namaUser)
+                .setContentText(alamat)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                // Set the intent that will fire when the user taps the notification
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        Picasso.get().load(url).into(new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                builder.setLargeIcon(bitmap);
+                notificationManager.notify(notificationId, builder.build());
+            }
+
+            @Override
+            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+            }
+        });
+
+        // notificationId is a unique int for each notification that you must define
+
+    }
+
 
     private void fetchlocation()
     {
@@ -473,5 +537,21 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 }

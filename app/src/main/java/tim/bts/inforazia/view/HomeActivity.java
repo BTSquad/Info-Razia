@@ -2,20 +2,26 @@ package tim.bts.inforazia.view;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 
-import android.view.Menu;
+
 import android.view.MenuItem;
 import android.view.View;
+
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import com.bumptech.glide.Glide;
 
@@ -57,6 +63,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        if (!isConnected(HomeActivity.this)) {
+            buildDialog(HomeActivity.this).show();
+        }
 
         //Google Sign In------------------------------------------------
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -100,9 +109,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         View headerView = navigationView.getHeaderView(0);
-         navEmailUser = (TextView) headerView.findViewById(R.id.email_user);
-         navNamaUser = (TextView) headerView.findViewById(R.id.nama_user);
-         navImageView = (CircleImageView) headerView.findViewById(R.id.profile_image);
+         navEmailUser =  headerView.findViewById(R.id.email_user);
+         navNamaUser =  headerView.findViewById(R.id.nama_user);
+         navImageView =  headerView.findViewById(R.id.profile_image);
 
          loadUserInformation();
     }
@@ -172,29 +181,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        getMenuInflater().inflate(R.menu.action_setting, menu);
-
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-        switch (item.getItemId()){
-            case R.id.setelan:
-                Intent intent = new Intent(HomeActivity.this, SetelanActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-
-            return true;
-            default:
-                return super.onOptionsItemSelected(item);
-
-        }
-    }
 
     public void loadUserInformation(){
 
@@ -212,8 +198,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
             navNamaUser.setText(firebaseUser.getDisplayName());
             navEmailUser.setText(firebaseUser.getEmail());
-
-
 
             if (firebaseUser.getPhotoUrl() == null) {
 
@@ -246,6 +230,41 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
             }
         }
+    }
+
+
+
+    public boolean isConnected(Context context) {
+
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netinfo = cm.getActiveNetworkInfo();
+
+        if (netinfo != null && netinfo.isConnectedOrConnecting()) {
+            android.net.NetworkInfo wifi = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            android.net.NetworkInfo mobile = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+
+            if((mobile != null && mobile.isConnectedOrConnecting()) || (wifi != null && wifi.isConnectedOrConnecting())) return true;
+        else return false;
+        } else
+        return false;
+    }
+
+    public AlertDialog.Builder buildDialog(Context c) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(c);
+        builder.setTitle("Anda Sedang Offline");
+        builder.setMessage("Tidak ada jaringan yang terhubung, Silahkan coba lagi nanti");
+
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+                moveTaskToBack(true);
+            }
+        });
+
+        return builder;
     }
 
 

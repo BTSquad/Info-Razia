@@ -17,7 +17,8 @@
         android:roundIcon="@drawable/re_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.DetailRaziaActivity"/>
+        <activity android:name=".view.ViewProfileActivity"></activity>
+        <activity android:name=".view.DetailRaziaActivity" />
         <activity android:name=".view.SetelanActivity" />
         <activity android:name=".view.ProfileActivity" />
         <activity android:name=".view.AboutActivity" />
@@ -28,7 +29,6 @@
         <activity android:name=".view.DaftarActivity" />
         <activity android:name=".view.MasukActivity" />
         <activity android:name=".view.MainActivity" />
-
         <activity android:name=".view.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

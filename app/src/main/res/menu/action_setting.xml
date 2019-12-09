@@ -10,6 +10,14 @@
         app:showAsAction="never"
         />
 
+    <item
+        android:id="@+id/pencarian"
+        android:icon="@drawable/ic_search"
+        android:title="Pencarian"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView"
+        />
+
 
 
 

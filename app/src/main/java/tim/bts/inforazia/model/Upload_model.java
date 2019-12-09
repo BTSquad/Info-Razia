@@ -13,7 +13,7 @@ public class Upload_model {
 
     }
 
-    public Upload_model( String mImageUrl) {
+    public Upload_model(String mImageUrl) {
 
         this.mImageUrl = mImageUrl;
 
