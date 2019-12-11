@@ -11,7 +11,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+//import com.google.android.gms.ads.AdListener;
+//import com.google.android.gms.ads.AdRequest;
+//import com.google.android.gms.ads.InterstitialAd;
+//import com.google.android.gms.ads.MobileAds;
+//import com.google.android.gms.ads.initialization.InitializationStatus;
+//import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -44,6 +51,9 @@ public class DetailRaziaActivity extends AppCompatActivity {
     private TextView namaUser_detail, detail_lokasi, tanggalUpload, waktuUpload, deskripsiDetail;
     private ImageView userDetailPhoto;
 
+    private static final String ID_UNIT_TEST = "ca-app-pub-3940256099942544/1033173712";
+    //private InterstitialAd interstitialIklan;
+
     private String namauser;
     private String idupload;
     private String userId;
@@ -58,6 +68,18 @@ public class DetailRaziaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_razia);
+
+//        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+//            @Override
+//            public void onInitializationComplete(InitializationStatus initializationStatus) {}
+//        });
+//
+//        interstitialIklan = new InterstitialAd(this);
+//        interstitialIklan.setAdUnitId(ID_UNIT_TEST);
+//
+//        tampilIklan();
+
+
 
         sliderView = findViewById(R.id.imageSlider);
 
@@ -154,6 +176,47 @@ public class DetailRaziaActivity extends AppCompatActivity {
                 .into(userDetailPhoto);
 
     }
+
+//    private void tampilIklan()
+//    {
+//        interstitialIklan.setAdListener(new AdListener() {
+//            @Override
+//            public void onAdLoaded() {
+//                Toast.makeText(DetailRaziaActivity.this, "onAdLoaded()", Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void onAdFailedToLoad(int errorCode) {
+//                Toast.makeText(DetailRaziaActivity.this,
+//                        "onAdFailedToLoad() with error code: " + errorCode,
+//                        Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void onAdClosed() {
+//
+//            }
+//        });
+//
+//
+//        if (interstitialIklan != null && interstitialIklan.isLoaded()) {
+//            interstitialIklan.show();
+//        } else {
+//            Toast.makeText(this, "Tidak ada iklan yang di tampilkan", Toast.LENGTH_SHORT).show();
+//
+//        }
+//
+//    }
+
+//    private void iklanBaru()
+//    {
+//        if (!interstitialIklan.isLoading() && !interstitialIklan.isLoaded()) {
+//            AdRequest adRequest = new AdRequest.Builder().build();
+//            interstitialIklan.loadAd(adRequest);
+//            interstitialIklan.show();
+//        }
+//
+//    }
 
 
 

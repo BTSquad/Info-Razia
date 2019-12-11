@@ -44,9 +44,11 @@ import android.widget.Toast;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -56,6 +58,8 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -71,10 +75,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import tim.bts.inforazia.APIService;
 import tim.bts.inforazia.R;
 import tim.bts.inforazia.adapter.ImageListAdapter;
 import tim.bts.inforazia.model.DataUpload_model;
 import tim.bts.inforazia.model.Upload_model;
+import tim.bts.inforazia.notify.Client;
+import tim.bts.inforazia.notify.Data;
+import tim.bts.inforazia.notify.Response;
+import tim.bts.inforazia.notify.Sender;
+import tim.bts.inforazia.notify.Token;
 
 public class LaporRaziaActivity extends AppCompatActivity {
 
@@ -109,8 +121,9 @@ public class LaporRaziaActivity extends AppCompatActivity {
     private DatabaseReference inputDetail;
     private ProgressDialog progressDialog;
     private long maxid_post = 1 ;
-    private String CHANNEL_ID = "Info Razia";
-    int notificationId = 001;
+
+    APIService apiService;
+    private boolean notify = false;
 
 
 
@@ -134,6 +147,10 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
         firebaseStorage = FirebaseStorage.getInstance().getReference();
 
+        apiService = Client.getClient("https://fcm.googleapis.com").create(APIService.class);
+
+
+
         upload = findViewById(R.id.upload_gambar_btn);
         gambar = findViewById(R.id.gambarSet);
         lokasiBtn = findViewById(R.id.berbagiLokasi);
@@ -153,9 +170,10 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
         mUploadList = findViewById(R.id.horizontalUpload);
 
-
         mUploadList.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
         mUploadList.setAdapter(imageListAdapter);
+
+        updateToken(FirebaseInstanceId.getInstance().getToken());
 
         back_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -214,7 +232,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
         post.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                notify = true;
                 String alamat = editLokasi.getText().toString().trim();
                 String deskripsi = deskripsiPost.getText().toString().trim();
                 if (deskripsi.isEmpty())
@@ -231,6 +249,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
            }
         });
+
 
 
     } @Override
@@ -404,7 +423,10 @@ public class LaporRaziaActivity extends AppCompatActivity {
                                         progressDialog.dismiss();
                                         fileUriList.clear();
 
-                                        sendNotif(userName, url, alamat);
+                                        if (notify){
+                                            sendNofication(alamat, url);
+                                        }
+                                        notify = false;
                                         Intent intent = new Intent(LaporRaziaActivity.this, HomeActivity.class);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                         startActivity(intent);
@@ -427,46 +449,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
     }
 
-    private void sendNotif(String namaUser , String url, String alamat){
-        createNotificationChannel();
 
-        Intent intent = new Intent(this, HomeActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.pop_up_logo)
-                .setColor(ContextCompat.getColor(this, R.color.primaryColor))
-                .setContentTitle(namaUser)
-                .setContentText(alamat)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                // Set the intent that will fire when the user taps the notification
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
-
-        final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-
-        Picasso.get().load(url).into(new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                builder.setLargeIcon(bitmap);
-                notificationManager.notify(notificationId, builder.build());
-            }
-
-            @Override
-            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-            }
-        });
-
-        // notificationId is a unique int for each notification that you must define
-
-    }
 
 
     private void fetchlocation()
@@ -539,19 +522,61 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
     }
 
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.channel_name);
-            String description = getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
+
+    private void updateToken(String token){
+
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("tokens");
+        Token token1 = new Token(token);
+        reference.child(firebaseUser.getUid()).setValue(token1);
     }
+
+
+
+    private void sendNofication(final String alamat, final String url){
+
+        DatabaseReference tokens = FirebaseDatabase.getInstance().getReference("tokens");
+
+        tokens.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren())
+                {
+                    Token token = ds.getValue(Token.class);
+                    Data data = new Data(firebaseUser.getUid(), url, alamat, "coba", ds.getKey());
+
+
+                    Sender sender = new Sender(data, token.getToken());
+
+                    apiService.sendNotification(sender).enqueue(new Callback<Response>() {
+                        @Override
+                        public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
+                            if (response.code() == 200)
+                            {
+                                if (response.body().succsess == 1)
+                                {
+                                    Toast.makeText(LaporRaziaActivity.this, "Send Sucsses", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Response> call, Throwable t) {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+
+    }
+
+
 }

@@ -69,11 +69,6 @@ public class MasukActivity extends AppCompatActivity {
 
     private DatabaseReference mDatabaseRef;
 
-
-
-//    long maxid;
-    boolean cek;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

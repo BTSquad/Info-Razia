@@ -9,11 +9,14 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 
 
@@ -46,6 +49,7 @@ import tim.bts.inforazia.view.Fragment.HomeFragment;
 public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
 
+    private static final String CHANNEL_ID = "Info Razia";
     FirebaseUser firebaseUser;
     FirebaseAuth firebaseAuth;
 
@@ -66,6 +70,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         if (!isConnected(HomeActivity.this)) {
             buildDialog(HomeActivity.this).show();
         }
+
 
         //Google Sign In------------------------------------------------
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -115,8 +120,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
          loadUserInformation();
     }
-
-
 
 
     @Override
@@ -266,6 +269,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
         return builder;
     }
+
+
 
 
 }
