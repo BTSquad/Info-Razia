@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -62,12 +63,14 @@ public class MasukActivity extends AppCompatActivity {
     private Button masuk_btn ;
     private ImageView back_btn;
     private ProgressBar progressBar;
-    private ImageView loginButton, btnSignIn_google;
+    private ImageView fbButton, btnSignIn_google;
     CallbackManager callbackManager;
 
     GoogleSignInClient mGoogleSignInClient;
 
     private DatabaseReference mDatabaseRef;
+
+    private boolean doubleClick = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,12 +140,12 @@ public class MasukActivity extends AppCompatActivity {
             }
         });
 
-        loginButton = findViewById(R.id.login_button);
+        fbButton = findViewById(R.id.login_button);
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
+        fbButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loginButton.setEnabled(false);
+                fbButton.setEnabled(false);
                 LoginManager.getInstance().logInWithReadPermissions(MasukActivity.this, Arrays.asList("email", "public_profile"));
                 LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
                     @Override
@@ -152,7 +155,8 @@ public class MasukActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancel() {
-                        Toast.makeText(MasukActivity.this, "error : Login Di batalkan" , Toast.LENGTH_LONG).show();
+                        Toast.makeText(MasukActivity.this, "Login Di batalkan" , Toast.LENGTH_LONG).show();
+                        fbButton.setEnabled(true);
                     }
 
                     @Override
@@ -170,6 +174,29 @@ public class MasukActivity extends AppCompatActivity {
 
 
     @Override
+    public void onBackPressed() {
+
+        if (doubleClick) {
+            super.onBackPressed();
+            return;
+        }
+
+        this.doubleClick = true;
+        Toast.makeText(this, "Tekan sekali lagi untuk keluar", Toast.LENGTH_SHORT).show();
+
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleClick=false;
+            }
+        }, 2000);
+
+
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
 
@@ -179,6 +206,8 @@ public class MasukActivity extends AppCompatActivity {
         if (firebaseUser != null && firebaseUser.isEmailVerified()){
             updateUI(firebaseUser);
         }
+
+
 
 
     }
@@ -204,6 +233,7 @@ public class MasukActivity extends AppCompatActivity {
 
             }
         }
+
 
 
     }
@@ -275,7 +305,7 @@ public class MasukActivity extends AppCompatActivity {
                             cekUserId(currentUser);
                             updateUI(currentUser);
 
-                            loginButton.setEnabled(true);
+                            fbButton.setEnabled(true);
                             finish();
 
                         } else {
@@ -284,7 +314,7 @@ public class MasukActivity extends AppCompatActivity {
                                     Toast.LENGTH_LONG).show();
                              updateUI(null);
 
-                             loginButton.setEnabled(true);
+                             fbButton.setEnabled(true);
                         }
 
                         // ...
@@ -401,14 +431,17 @@ public class MasukActivity extends AppCompatActivity {
 
     private void simpanUserId(final FirebaseUser user){
 
-                DatabaseReference simpanUser = mDatabaseRef.child("Users");
+                DatabaseReference simpanUser = mDatabaseRef.child("Users").child(user.getUid());
 
                 Users_model users_model = new Users_model(user.getUid(),
                         user.getDisplayName(),
                         user.getEmail(),
-                        String.valueOf(user.getPhotoUrl()));
+                        String.valueOf(user.getPhotoUrl())
+                        , "1", "Pilih Lokasi");
 
-                simpanUser.push().setValue(users_model);
+                simpanUser.setValue(users_model);
+
+
 
             }
             

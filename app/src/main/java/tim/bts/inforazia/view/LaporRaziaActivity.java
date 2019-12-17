@@ -4,26 +4,18 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.Manifest;
-
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
-
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -40,41 +32,29 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.squareup.picasso.Picasso;
 
-import com.squareup.picasso.Target;
 
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import tim.bts.inforazia.APIService;
@@ -82,6 +62,7 @@ import tim.bts.inforazia.R;
 import tim.bts.inforazia.adapter.ImageListAdapter;
 import tim.bts.inforazia.model.DataUpload_model;
 import tim.bts.inforazia.model.Upload_model;
+import tim.bts.inforazia.model.Users_model;
 import tim.bts.inforazia.notify.Client;
 import tim.bts.inforazia.notify.Data;
 import tim.bts.inforazia.notify.Response;
@@ -90,8 +71,8 @@ import tim.bts.inforazia.notify.Token;
 
 public class LaporRaziaActivity extends AppCompatActivity {
 
-    private ImageView back_btn;
-    private Uri imageUri;
+    ImageView back_btn;
+    Uri imageUri;
 
     private String namaFileUpload;
 
@@ -100,11 +81,12 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
     private ImageView upload, gambar, pickMedia;
     private LinearLayout lokasiBtn;
-    private TextView lokasiSaatIni;
+    private TextView lokasiSaatIni, kotaKab;
     private ProgressBar progressBar;
     private RecyclerView mUploadList;
     private Button post;
     private EditText deskripsiPost, editLokasi;
+
 
     private FusedLocationProviderClient fusedLocationClient;
 
@@ -124,14 +106,15 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
     APIService apiService;
     private boolean notify = false;
-
+    private final int PERMISSION_CODE = 1000;
+    private String kota;
+    String UidUser;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lapor_razia);
-
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Proses upload silahkan tunggu");
@@ -140,7 +123,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
-        String UidUser = firebaseUser.getUid();
+        UidUser = firebaseUser.getUid();
 
         databaseReference = FirebaseDatabase.getInstance().getReference().child("viewPost");
         inputDetail = FirebaseDatabase.getInstance().getReference().child("detailPost").child(UidUser);
@@ -148,8 +131,6 @@ public class LaporRaziaActivity extends AppCompatActivity {
         firebaseStorage = FirebaseStorage.getInstance().getReference();
 
         apiService = Client.getClient("https://fcm.googleapis.com").create(APIService.class);
-
-
 
         upload = findViewById(R.id.upload_gambar_btn);
         gambar = findViewById(R.id.gambarSet);
@@ -161,6 +142,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
         post = findViewById(R.id.post_btn);
         deskripsiPost = findViewById(R.id.deskripsi_txt);
         editLokasi = findViewById(R.id.field_lokasi);
+        kotaKab = findViewById(R.id.kotaKabupaten);
 
         progressBar.setVisibility(View.INVISIBLE);
 
@@ -173,7 +155,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
         mUploadList.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
         mUploadList.setAdapter(imageListAdapter);
 
-        updateToken(FirebaseInstanceId.getInstance().getToken());
+
 
         back_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -188,10 +170,26 @@ public class LaporRaziaActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.M){
+                    if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED
+                            || checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+                            PackageManager.PERMISSION_DENIED){
 
-                Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, true);
-                startActivityForResult(intentCamera, CAMERA_REQUEST_PICK);
+                        String[] permission = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+                        requestPermissions(permission, PERMISSION_CODE);
+
+
+                    }else {
+                        //permission granted
+
+                       cameraOpen();
+                    }
+                }else {
+                    // os system < marsmellow
+                  cameraOpen();
+                }
+
             }
         });
 
@@ -207,7 +205,6 @@ public class LaporRaziaActivity extends AppCompatActivity {
         pickMedia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
 
                 Intent intent = new Intent();
                 intent.setType("image/*");
@@ -229,21 +226,46 @@ public class LaporRaziaActivity extends AppCompatActivity {
             }
         });
 
+        kota = getIntent().getStringExtra("kota");
+
+        if (kota != null){
+            kotaKab.setText(kota);
+        }else {
+            cekUserLokasi();
+        }
+
+        kotaKab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent pilihProvinsi = new Intent(LaporRaziaActivity.this, PilihLokasiActivity.class);
+                pilihProvinsi.putExtra("Activity", "ActivityLapor");
+                pilihProvinsi.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(pilihProvinsi);
+            }
+        });
+
         post.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 notify = true;
                 String alamat = editLokasi.getText().toString().trim();
                 String deskripsi = deskripsiPost.getText().toString().trim();
+                String kotaAtauKab = kotaKab.getText().toString().trim();
+
                 if (deskripsi.isEmpty())
                 {
                     deskripsiPost.setError("Deskripsi Wajib Diisi");
                 }else if(alamat.isEmpty())
                 {
                     editLokasi.setError("Silahkan Berikan lokasi Anda");
-                }else {
-
-
+                }else if(kotaAtauKab.isEmpty())
+                {
+                    kotaKab.setError("Pilih Kota Atau Kabupaten");
+                    Toast.makeText(LaporRaziaActivity.this, "Pilih Kota atau Kabupaten", Toast.LENGTH_SHORT).show();
+                }else if (fileUriList.size() <= 0){
+                    Toast.makeText(LaporRaziaActivity.this, "Anda belum mengupload gambar", Toast.LENGTH_SHORT).show();
+                }
+                else {
                 uploadGambar();
                 }
 
@@ -260,15 +282,66 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode) {
+            case PERMISSION_CODE:{
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    cameraOpen();
+                }else {
+                    Toast.makeText(this, "Izin Kamera Diperlukan", Toast.LENGTH_SHORT).show();
+                }
+            }
+            case MY_PERMISSIONS_REQUEST_COARSE_LOCATION:{
+
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    getLokasiTerakhir();
+
+                }else {
+
+                    Toast.makeText(this, "Izin Lokasi Diperlukan", Toast.LENGTH_SHORT).show();
+
+                }
+
+            }
+        }
+
+    }
+
+    private void cameraOpen(){
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, System.currentTimeMillis() + "NEW PRICTURE");
+        values.put(MediaStore.Images.Media.DESCRIPTION, "FROM CAMERA");
+        imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        // Intent Camera
+        Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        startActivityForResult(intentCamera, CAMERA_REQUEST_PICK);
+
+    }
+
     private void pickImage(int requestCode, int resultCode, Intent data)
     {
         if (requestCode == CAMERA_REQUEST_PICK && resultCode == RESULT_OK)
         {
+            Uri fileUri = data.getData();
+            try {
 
-            Bundle extras = data.getExtras();
-            Bitmap bitmap = (Bitmap) extras.get("data");
+                InputStream is = getContentResolver().openInputStream(fileUri);
 
-               fileDonelist.add(bitmap);
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+                fileDonelist.add(bitmap);
+                fileUriList.add(fileUri);
+
+            }catch (Exception e){
+                e.printStackTrace();
+
+            }
+            imageListAdapter.notifyDataSetChanged();
+
 
         }else if (requestCode == PICK_MEDIA_GALLERY && resultCode == RESULT_OK)
         {
@@ -406,7 +479,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
                                 DataUpload_model data = new DataUpload_model(alamat, deskripsi, tanggal,
                                         waktu, url, UidUser, userName, photoUrl,
-                                        uploadId, String.valueOf(maxid_post));
+                                        uploadId, String.valueOf(maxid_post), "0");
 
                                 if (finalUpload_count < 1) {
 
@@ -415,7 +488,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
                                 final DatabaseReference simpanDetail = inputDetail.child(uploadId);
 
-                                Upload_model upload_model = new Upload_model(url);
+                                final Upload_model upload_model = new Upload_model(url);
                                 simpanDetail.push().setValue(upload_model).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
@@ -424,7 +497,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
                                         fileUriList.clear();
 
                                         if (notify){
-                                            sendNofication(alamat, url);
+                                            getUser(alamat, url);
                                         }
                                         notify = false;
                                         Intent intent = new Intent(LaporRaziaActivity.this, HomeActivity.class);
@@ -450,100 +523,106 @@ public class LaporRaziaActivity extends AppCompatActivity {
     }
 
 
-
-
     private void fetchlocation()
     {
 
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(LaporRaziaActivity.this,
                 Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+                != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
             progressBar.setVisibility(View.INVISIBLE);
 
-            // Permission is not granted
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(LaporRaziaActivity.this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_COARSE_LOCATION);
 
-                new AlertDialog.Builder(this).setTitle("Izin Lokasi").setMessage("Yakin Memberikan Akses lokasi ?")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                ActivityCompat.requestPermissions(LaporRaziaActivity.this,
-                                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                                        MY_PERMISSIONS_REQUEST_COARSE_LOCATION);
 
-                            }
-                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                }).create().show();
 
-            } else {
-                // No explanation needed; request the permission
-                ActivityCompat.requestPermissions(LaporRaziaActivity.this,
-                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_COARSE_LOCATION);
-            }
         } else {
 
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            // Got last known location. In some rare situations this can be null.
-                            if (location != null) {
-
-                                Double lattiude = location.getLatitude();
-                                Double longtitude = location.getLongitude();
-
-                                try {
-                                    Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-                                    List<Address> addresses = geocoder.getFromLocation(lattiude, longtitude, 1);
-                                    if (addresses != null && addresses.size() > 0){
-
-                                        String address = addresses.get(0).getAddressLine(0);
-
-                                        progressBar.setVisibility(View.INVISIBLE);
-                                        editLokasi.setText(address);
-
-                                    }
-                                }catch (Exception e){
-                                    Toast.makeText(LaporRaziaActivity.this, "eroor : " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        }
-                    });
-
+                getLokasiTerakhir();
         }
 
     }
 
+    private void getLokasiTerakhir(){
 
-    private void updateToken(String token){
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
 
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("tokens");
-        Token token1 = new Token(token);
-        reference.child(firebaseUser.getUid()).setValue(token1);
+                            Double lattiude = location.getLatitude();
+                            Double longtitude = location.getLongitude();
+
+                            try {
+                                Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+                                List<Address> addresses = geocoder.getFromLocation(lattiude, longtitude, 1);
+                                if (addresses != null && addresses.size() > 0){
+
+                                    String address = addresses.get(0).getAddressLine(0);
+
+                                    progressBar.setVisibility(View.INVISIBLE);
+                                    editLokasi.setText(address);
+
+                                }
+                            }catch (Exception e){
+                                Toast.makeText(LaporRaziaActivity.this, "eroor : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+                });
+
+
     }
 
 
+    private void getUser(final String alamat, final String url){
 
-    private void sendNofication(final String alamat, final String url){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
+
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren())
+                {
+                    Users_model users_model = ds.getValue(Users_model.class);
+
+                    assert users_model != null;
+                    if (users_model.getLokasiNotif().contentEquals(kotaKab.getText()) && users_model.getNotif().equals("1")){
+                        sendNotifikasi(alamat, url, users_model.getUserId());
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+
+    private void sendNotifikasi(final String alamat, final String url, String uid){
 
         DatabaseReference tokens = FirebaseDatabase.getInstance().getReference("tokens");
 
-        tokens.addValueEventListener(new ValueEventListener() {
+        Query getToken = tokens.orderByKey().equalTo(uid);
+
+        getToken.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren())
                 {
                     Token token = ds.getValue(Token.class);
-                    Data data = new Data(firebaseUser.getUid(), url, alamat, "coba", ds.getKey());
 
+                    Data data = new Data(firebaseUser.getUid(), url, alamat, "coba", ds.getKey());
 
                     Sender sender = new Sender(data, token.getToken());
 
@@ -561,7 +640,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
                         @Override
                         public void onFailure(Call<Response> call, Throwable t) {
-
+                            Toast.makeText(LaporRaziaActivity.this, "Gagal Mengirim Notif", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
@@ -575,8 +654,61 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
 
 
-
     }
 
+
+    private void cekUserLokasi(){
+
+        DatabaseReference db_user = FirebaseDatabase.getInstance().getReference("Users");
+        Query getUserLokasi = db_user.orderByChild("userId").equalTo(UidUser);
+
+        getUserLokasi.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot ds : dataSnapshot.getChildren()){
+                    Users_model getUser = ds.getValue(Users_model.class);
+
+                    if (getUser.getLokasiNotif().equals("Pilih Lokasi")){
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(LaporRaziaActivity.this);
+
+                        builder.setMessage("Lengkapi informasi anda, untuk memposting razia")
+                                .setPositiveButton("Lanjutkan", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Intent intent = new Intent(LaporRaziaActivity.this, SetelanNotifikasiActivity.class);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        startActivity(intent);
+                                    }
+                                }).setNegativeButton("Kembali", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent intentHome = new Intent(LaporRaziaActivity.this, HomeActivity.class);
+                                intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intentHome);
+                            }
+                        });
+
+                        AlertDialog alertDialog = builder.create();
+                        alertDialog.show();
+
+                    }else {
+                        kotaKab.setText(getUser.getLokasiNotif());
+                    }
+
+
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
 
 }

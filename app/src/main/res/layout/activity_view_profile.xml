@@ -38,7 +38,7 @@
 
             <TextView
                 android:id="@+id/namaUserViewProfile"
-                android:layout_marginTop="100dp"
+                android:layout_marginTop="80dp"
                 android:gravity="center_horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -60,8 +60,9 @@
 
 
 
-
         </LinearLayout>
+
+
 
 
 

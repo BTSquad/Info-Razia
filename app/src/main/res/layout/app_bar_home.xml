@@ -68,7 +68,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
-        android:src="@drawable/ic_camera_big"
-        app:maxImageSize="30dp"/>
+        android:src="@drawable/lapor"
+        app:maxImageSize="60dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

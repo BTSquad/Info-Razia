@@ -8,17 +8,17 @@
         <item
             android:id="@+id/home"
             android:title="Home"
-            android:icon="@drawable/ic_home"/>
+            android:icon="@drawable/home"/>
 
         <item
             android:id="@+id/pasal"
             android:title="Pasal-Pasal"
-            android:icon="@drawable/ic_pasal"/>
+            android:icon="@drawable/pasal"/>
 
         <item
             android:id="@+id/lapor"
             android:title="Lapor Razia"
-            android:icon="@drawable/ic_add_location_black_24dp"/>
+            android:icon="@drawable/lapor"/>
 
     </group>
 
@@ -29,12 +29,12 @@
         <item
             android:id="@+id/about"
             android:title="Tentang"
-            android:icon="@drawable/ic_about_24dp"/>
+            android:icon="@drawable/info2"/>
 
         <item
             android:id="@+id/keluar"
             android:title="Keluar"
-            android:icon="@drawable/ic_about_24dp"/>
+            android:icon="@drawable/log_out"/>
 
 
 

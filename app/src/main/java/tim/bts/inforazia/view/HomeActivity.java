@@ -8,25 +8,17 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentTransaction;
-
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
-
-
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
-
 import android.widget.TextView;
-
-
-import com.bumptech.glide.Glide;
+import android.widget.Toast;
 
 import com.facebook.login.LoginManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -34,22 +26,28 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
-
-
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.squareup.picasso.Picasso;
 import de.hdodenhof.circleimageview.CircleImageView;
 import tim.bts.inforazia.R;
 
+import tim.bts.inforazia.model.Users_model;
+import tim.bts.inforazia.notify.Token;
 import tim.bts.inforazia.view.Fragment.HomeFragment;
 
 
 public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
 
-    private static final String CHANNEL_ID = "Info Razia";
     FirebaseUser firebaseUser;
     FirebaseAuth firebaseAuth;
 
@@ -62,6 +60,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     TextView navNamaUser;
     TextView navEmailUser;
 
+    private boolean doubleClick = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +71,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             buildDialog(HomeActivity.this).show();
         }
 
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseUser = firebaseAuth.getCurrentUser();
+
+        cekUserLokasi(firebaseUser);
+
 
         //Google Sign In------------------------------------------------
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -78,6 +83,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 .requestEmail()
                 .build();
         //--------------------------------------------------------------
+
+        updateToken(FirebaseInstanceId.getInstance().getToken());
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
@@ -91,7 +98,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View view) {
 
                 Intent intent = new Intent(HomeActivity.this, LaporRaziaActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }
         });
@@ -138,19 +145,19 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }else if (id == R.id.pasal){
 
             Intent intent = new Intent(HomeActivity.this, PasalActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
 
         }else if (id == R.id.lapor){
 
             Intent intent = new Intent(HomeActivity.this, LaporRaziaActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
 
         }else if (id == R.id.about){
 
             Intent intent = new Intent(HomeActivity.this, AboutActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
 
         }else if (id == R.id.keluar){
@@ -170,17 +177,32 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
+
     @Override
     public void onBackPressed() {
 
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START))
         {
             mDrawerLayout.closeDrawer(GravityCompat.START);
-        }else
-        {
-            super.onBackPressed();
+        }else {
+            Toast.makeText(this, "Tekan sekali lagi untuk keluar", Toast.LENGTH_SHORT).show();
         }
 
+        if (doubleClick) {
+            super.onBackPressed();
+            return;
+        }
+
+        this.doubleClick = true;
+
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleClick=false;
+            }
+        }, 2000);
 
     }
 
@@ -195,8 +217,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             if (firebaseUser.getPhotoUrl() == null){
                 navImageView.setEnabled(false);
             }else{
-                Glide.with(this).load(firebaseUser.getPhotoUrl().toString()).into(navImageView);
 
+                Picasso.get().load(firebaseUser.getPhotoUrl().toString()).into(navImageView);
             }
 
             navNamaUser.setText(firebaseUser.getDisplayName());
@@ -209,7 +231,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                             navEmailUser.setEnabled(false);
                         }else{
 
-                            Glide.with(this).load(profile.getPhotoUrl().toString()).into(navImageView);
+                            Picasso.get().load(firebaseUser.getPhotoUrl().toString()).into(navImageView);
 
                         }
 
@@ -271,6 +293,65 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
+    private void updateToken(String token){
 
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("tokens");
+        Token token1 = new Token(token);
+        reference.child(firebaseUser.getUid()).setValue(token1);
+    }
+
+
+    private void cekUserLokasi(final FirebaseUser user){
+
+        DatabaseReference db_user = FirebaseDatabase.getInstance().getReference("Users");
+        Query getUserLokasi = db_user.orderByChild("userId").equalTo(user.getUid());
+
+        getUserLokasi.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot ds : dataSnapshot.getChildren()){
+                    Users_model getUser = ds.getValue(Users_model.class);
+
+                    if (getUser.getLokasiNotif().equals("Pilih Lokasi")){
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
+
+
+                        builder.setMessage("Lengkapi informasi anda, untuk mendapatkan notifikasi sesuai kota anda")
+                                .setPositiveButton("Lanjutkan", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Intent intent = new Intent(HomeActivity.this, SetelanNotifikasiActivity.class);
+                                        intent.putExtra("uid", user.getUid());
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        startActivity(intent);
+                                    }
+                                }).setNegativeButton("Tidak Sekarang", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+
+                         AlertDialog alertDialog = builder.create();
+
+                        alertDialog.show();
+
+                    }
+
+
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
 
 }

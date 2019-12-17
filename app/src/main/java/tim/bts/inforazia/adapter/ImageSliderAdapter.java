@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
 import com.smarteist.autoimageslider.SliderViewAdapter;
 import com.squareup.picasso.Picasso;
 
@@ -16,7 +15,7 @@ import java.util.List;
 import tim.bts.inforazia.R;
 import tim.bts.inforazia.model.DataUpload_model;
 import tim.bts.inforazia.model.Upload_model;
-import tim.bts.inforazia.model.Users_model;
+
 
 public class ImageSliderAdapter extends SliderViewAdapter<ImageSliderAdapter.SliderAdapterVH> {
 

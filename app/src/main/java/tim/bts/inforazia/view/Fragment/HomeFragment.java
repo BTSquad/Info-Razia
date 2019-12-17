@@ -18,27 +18,30 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+
 import androidx.appcompat.widget.SearchView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
+
 import java.util.List;
 
 import tim.bts.inforazia.R;
 
 import tim.bts.inforazia.adapter.PostListAdapter;
 import tim.bts.inforazia.model.DataUpload_model;
-import tim.bts.inforazia.view.HomeActivity;
+
 import tim.bts.inforazia.view.SetelanActivity;
 
 /**
@@ -48,15 +51,14 @@ public class HomeFragment extends Fragment  {
 
     private RecyclerView mPostList;
     private LinearLayoutManager manager;
-    private Button mButtonRefresh;
-    PostListAdapter postListAdapter;
-    SwipeRefreshLayout swipeRefreshLayout;
+    private PostListAdapter postListAdapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
-    DatabaseReference refDetail;
-    private int totalItemLoad = 10;
-    int total_item = 0, last_visible_item;
-    boolean isLoading = false, isMaxData = false;
-    String last_node="", last_key="";
+    private DatabaseReference refDetail;
+    private int totalItemLoad = 7;
+    private int total_item = 0, last_visible_item;
+    private boolean isLoading = false, isMaxData = false;
+    private String last_node="", last_key="";
 
     public HomeFragment() {
         // Required empty public constructor
@@ -83,7 +85,7 @@ public class HomeFragment extends Fragment  {
 
         manager.setReverseLayout(true);
         manager.setStackFromEnd(true);
-        mPostList.setAdapter(postListAdapter);
+
 
         postListAdapter = new PostListAdapter(getContext());
         mPostList.setAdapter(postListAdapter);
@@ -150,28 +152,81 @@ public class HomeFragment extends Fragment  {
 
                        for (DataSnapshot ds : dataSnapshot.getChildren())
                        {
+                                final DataUpload_model dataUpload_model = ds.getValue(DataUpload_model.class);
 
-                               newData.add(ds.getValue(DataUpload_model.class));
+                                if (Integer.parseInt(dataUpload_model.getLaporan()) >= 30){
+
+                                    final StorageReference photoRef =
+                                            FirebaseStorage.getInstance()
+                                                    .getReferenceFromUrl(dataUpload_model.getmImageUrl());
+                                    //delete file storage
+                                    photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+
+                                            Query deletePost = refDetail.child("viewPost")
+                                                    .orderByChild("idUpload")
+                                                    .equalTo(dataUpload_model.getIdUpload());
+
+                                            deletePost.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    for (DataSnapshot dsDelete : dataSnapshot.getChildren())
+                                                    {
+                                                        DatabaseReference deleteDetailPost  =
+                                                                refDetail.child("detailPost")
+                                                                        .child(dataUpload_model.getUID())
+                                                                        .child(dataUpload_model.getIdUpload());
+                                                        //delete viewPost
+                                                        dsDelete.getRef().removeValue();
+                                                        //delete detailPost
+                                                        deleteDetailPost.removeValue();
+
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                }
+                                            });
+                                        }
+                                    });
 
 
+
+
+                                }else {
+                                    if (dataUpload_model.getIdUpload() != null){
+                                        newData.add(dataUpload_model);
+                                    }else {
+                                        Toast.makeText(getActivity(), "Data belum ada", Toast.LENGTH_SHORT).show();
+                                    }
+
+                                }
                        }
 
-
-                       last_node = String.valueOf(newData.get(newData.size() - 1).getCounter());
-
-                       if (!last_node.equals(last_key))
-                       {
-                           newData.remove(newData.size() - 1);
+                       if (newData.size() == 0){
+                           Toast.makeText(getActivity(), "Data masih kosong", Toast.LENGTH_SHORT).show();
                        }else {
-                           last_node = "end";
+
+                           last_node = String.valueOf(newData.get(newData.size() - 1).getCounter());
+
+
+                           if (!last_node.equals(last_key))
+                           {
+                               newData.remove(newData.size() - 1);
+                           }else {
+                               last_node = "end";
+
+                           }
+
+                           postListAdapter.addAll(newData);
+
+                           mPostList.setAdapter(postListAdapter);
+                           isLoading = false;
 
                        }
-
-
-                       postListAdapter.addAll(newData);
-
-                       mPostList.setAdapter(postListAdapter);
-                       isLoading = false;
 
                    }else {
                        isLoading = false;
@@ -226,7 +281,7 @@ public class HomeFragment extends Fragment  {
         switch (item.getItemId()){
             case R.id.setelan:
                 Intent intent = new Intent(getActivity(), SetelanActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 return true;
 
@@ -248,8 +303,16 @@ public class HomeFragment extends Fragment  {
                         return false;
                     }
                 });
+                return true;
+
+            case R.id.my_post:
+
+                Toast.makeText(getActivity(), "Belum dibuat sabar lah", Toast.LENGTH_SHORT).show();
+
 
                 return true;
+
+
 
             default:
                 return super.onOptionsItemSelected(item);

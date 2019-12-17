@@ -13,12 +13,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-//import com.google.android.gms.ads.AdListener;
-//import com.google.android.gms.ads.AdRequest;
-//import com.google.android.gms.ads.InterstitialAd;
-//import com.google.android.gms.ads.MobileAds;
-//import com.google.android.gms.ads.initialization.InitializationStatus;
-//import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -30,7 +30,6 @@ import com.smarteist.autoimageslider.SliderView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import tim.bts.inforazia.R;
@@ -52,7 +51,11 @@ public class DetailRaziaActivity extends AppCompatActivity {
     private ImageView userDetailPhoto;
 
     private static final String ID_UNIT_TEST = "ca-app-pub-3940256099942544/1033173712";
-    //private InterstitialAd interstitialIklan;
+    private static final String ID_UNIT_IKLAN_INTERESIAL = "ca-app-pub-7973392951366806/4923011625";
+
+
+    private InterstitialAd interstitialIklan;
+
 
     private String namauser;
     private String idupload;
@@ -62,6 +65,7 @@ public class DetailRaziaActivity extends AppCompatActivity {
     private String waktu;
     private String deskripsi;
     private String urlPhoto;
+    private String activity;
 
 
     @Override
@@ -69,17 +73,22 @@ public class DetailRaziaActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_razia);
 
-//        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-//            @Override
-//            public void onInitializationComplete(InitializationStatus initializationStatus) {}
-//        });
-//
-//        interstitialIklan = new InterstitialAd(this);
-//        interstitialIklan.setAdUnitId(ID_UNIT_TEST);
-//
-//        tampilIklan();
+        // ads------------------------------------------------------------------------------------
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {}
+        });
+
+        interstitialIklan = new InterstitialAd(this);
+        interstitialIklan.setAdUnitId(ID_UNIT_TEST);
+
+        interstitialIklan.loadAd(new AdRequest.Builder().build());
+
+       //reqIklan();
+        interesialAds();
 
 
+        //end ads----------------------------------------------------------------------------
 
         sliderView = findViewById(R.id.imageSlider);
 
@@ -99,6 +108,7 @@ public class DetailRaziaActivity extends AppCompatActivity {
         waktu = getIntent().getStringExtra("waktu");
         deskripsi = getIntent().getStringExtra("deskripsi");
         urlPhoto = getIntent().getStringExtra("photoUser");
+        activity = getIntent().getStringExtra("activity");
 
         detailPost = FirebaseDatabase.getInstance().getReference().child("detailPost").child(userId).child(idupload);
 
@@ -111,13 +121,8 @@ public class DetailRaziaActivity extends AppCompatActivity {
                 {
                     Upload_model upload_model = ds.getValue(Upload_model.class);
 
-
-
                     urlList.add(upload_model);
 
-
-
-                    Log.d(TAG, "Value :"+ upload_model.getmImageUrl());
                     setDetail();
 
                 }
@@ -130,20 +135,33 @@ public class DetailRaziaActivity extends AppCompatActivity {
             }
         });
 
-
-
         back_btn = findViewById(R.id.back);
 
-        back_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        if (activity.equals("postSaya")){
+
+            back_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
 
-                Intent intentBack = new Intent(DetailRaziaActivity.this, HomeActivity.class);
-                intentBack.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intentBack);
-            }
-        });
+                    Intent intentBack = new Intent(DetailRaziaActivity.this, ProfileActivity.class);
+                    intentBack.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intentBack);
+                }
+            });
+        }else {
+
+            back_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    Intent intentBack = new Intent(DetailRaziaActivity.this, HomeActivity.class);
+                    intentBack.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intentBack);
+                }
+            });
+
+        }
 
 
 
@@ -159,7 +177,7 @@ public class DetailRaziaActivity extends AppCompatActivity {
         sliderView.setSliderTransformAnimation(SliderAnimations.SIMPLETRANSFORMATION);
         sliderView.setAutoCycleDirection(SliderView.AUTO_CYCLE_DIRECTION_BACK_AND_FORTH);
         sliderView.setIndicatorSelectedColor(Color.WHITE);
-        sliderView.setIndicatorUnselectedColor(Color.BLUE);
+        sliderView.setIndicatorUnselectedColor(Color.GREEN);
         sliderView.setScrollTimeInSec(10); //set scroll delay in seconds :
         sliderView.startAutoCycle();
 
@@ -177,46 +195,49 @@ public class DetailRaziaActivity extends AppCompatActivity {
 
     }
 
-//    private void tampilIklan()
-//    {
-//        interstitialIklan.setAdListener(new AdListener() {
-//            @Override
-//            public void onAdLoaded() {
-//                Toast.makeText(DetailRaziaActivity.this, "onAdLoaded()", Toast.LENGTH_SHORT).show();
-//            }
-//
-//            @Override
-//            public void onAdFailedToLoad(int errorCode) {
-//                Toast.makeText(DetailRaziaActivity.this,
-//                        "onAdFailedToLoad() with error code: " + errorCode,
-//                        Toast.LENGTH_SHORT).show();
-//            }
-//
-//            @Override
-//            public void onAdClosed() {
-//
-//            }
-//        });
-//
-//
-//        if (interstitialIklan != null && interstitialIklan.isLoaded()) {
-//            interstitialIklan.show();
-//        } else {
-//            Toast.makeText(this, "Tidak ada iklan yang di tampilkan", Toast.LENGTH_SHORT).show();
-//
-//        }
-//
-//    }
+    private void interesialAds()
+    {
 
-//    private void iklanBaru()
-//    {
-//        if (!interstitialIklan.isLoading() && !interstitialIklan.isLoaded()) {
-//            AdRequest adRequest = new AdRequest.Builder().build();
-//            interstitialIklan.loadAd(adRequest);
-//            interstitialIklan.show();
-//        }
-//
-//    }
+        interstitialIklan.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                Toast.makeText(DetailRaziaActivity.this, "onAdLoaded()", Toast.LENGTH_SHORT).show();
+                tampilAds();
+            }
+
+            @Override
+            public void onAdFailedToLoad(int errorCode) {
+                Toast.makeText(DetailRaziaActivity.this,
+                        "onAdFailedToLoad() with error code: " + errorCode,
+                        Toast.LENGTH_SHORT).show();
+            }
+
+
+        });
+
+
+
+
+    }
+
+    private void tampilAds(){
+        if (interstitialIklan != null && interstitialIklan.isLoaded()) {
+            interstitialIklan.show();
+        } else {
+            Toast.makeText(this, "Tidak ada iklan yang di tampilkan", Toast.LENGTH_SHORT).show();
+
+        }
+    }
+
+
+    private void reqIklan()
+    {
+        if (!interstitialIklan.isLoading() && !interstitialIklan.isLoaded()) {
+            AdRequest adRequest = new AdRequest.Builder().build();
+            interstitialIklan.loadAd(adRequest);
+        }
+
+    }
 
 
 

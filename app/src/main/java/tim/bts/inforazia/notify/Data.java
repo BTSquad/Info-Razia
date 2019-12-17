@@ -3,7 +3,7 @@ package tim.bts.inforazia.notify;
 public class Data {
 
     private String user;
-    private String  icon;
+    private String icon;
     private String body;
     private String title;
     private String sented;

@@ -10,30 +10,39 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/image_profile_user"
-            android:layout_marginTop="125dp"
-            android:layout_centerHorizontal="true"
-            android:layout_width="140dp"
-            android:layout_height="140dp"
-            android:src="@drawable/ic_user_24dp"
-            app:civ_border_width="6dp"
-            app:civ_border_color="@color/secondaryLightColor"
-            android:elevation="1dp"/>
-
-        <ImageView
-            android:layout_marginLeft="230dp"
-            android:layout_marginTop="225dp"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/ic_kamera"
-           android:elevation="2dp"/>
-
-
 
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/edit_PhotoProfile"
+                    android:layout_marginTop="215dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_width="match_parent"
+                    android:paddingLeft="110dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/ic_kamera"
+                    app:civ_circle_background_color="@color/secondaryLightColor"
+                    app:civ_border_width="5dp"
+                    app:civ_border_color="@color/secondaryLightColor"
+                    android:elevation="2dp"/>
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                app:civ_circle_background_color="@color/secondaryLightColor"
+                android:id="@+id/image_profile_user"
+                android:layout_marginTop="125dp"
+                android:layout_centerHorizontal="true"
+                android:layout_width="140dp"
+                android:layout_height="140dp"
+                android:src="@drawable/ic_user_24dp"
+                app:civ_border_width="6dp"
+                app:civ_border_color="@color/secondaryLightColor"
+                android:elevation="1dp"/>
 
 
             <LinearLayout
@@ -50,7 +59,7 @@
 
                 <TextView
                     android:id="@+id/namaUserProfile"
-                    android:layout_marginTop="100dp"
+                    android:layout_marginTop="80dp"
                     android:gravity="center_horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -59,9 +68,17 @@
                     android:textColor="@color/primaryTextColor"
                     android:text="Username"/>
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_marginTop="20dp"
+                    android:id="@+id/recyclerView_userPost"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
+                </androidx.recyclerview.widget.RecyclerView>
 
-            </LinearLayout>
+                </LinearLayout>
+
+            </RelativeLayout>
 
         </ScrollView>
 
