@@ -1,7 +1,9 @@
 package tim.bts.inforazia.view.Fragment;
 
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -22,6 +24,7 @@ import android.view.ViewGroup;
 import androidx.appcompat.widget.SearchView;
 import android.widget.Toast;
 
+import com.facebook.share.Share;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,8 +34,11 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -43,6 +49,8 @@ import tim.bts.inforazia.adapter.PostListAdapter;
 import tim.bts.inforazia.model.DataUpload_model;
 
 import tim.bts.inforazia.view.SetelanActivity;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -60,11 +68,11 @@ public class HomeFragment extends Fragment  {
     private boolean isLoading = false, isMaxData = false;
     private String last_node="", last_key="";
 
+    List<DataUpload_model> newData;
+
     public HomeFragment() {
         // Required empty public constructor
     }
-
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -83,16 +91,14 @@ public class HomeFragment extends Fragment  {
         manager = new LinearLayoutManager(getActivity());
         mPostList.setLayoutManager(manager);
 
-        manager.setReverseLayout(true);
-        manager.setStackFromEnd(true);
-
+     manager.setReverseLayout(true);
+     manager.setStackFromEnd(true);
 
         postListAdapter = new PostListAdapter(getContext());
         mPostList.setAdapter(postListAdapter);
 
-
+        //loadData();
         getPost();
-
 
         mPostList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -122,9 +128,6 @@ public class HomeFragment extends Fragment  {
          }
      });
 
-
-
-
       return v;
     }
 
@@ -148,7 +151,7 @@ public class HomeFragment extends Fragment  {
                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                    if (dataSnapshot.hasChildren())
                    {
-                       List<DataUpload_model> newData = new ArrayList<>();
+                        newData = new ArrayList<>();
 
                        for (DataSnapshot ds : dataSnapshot.getChildren())
                        {
@@ -193,12 +196,10 @@ public class HomeFragment extends Fragment  {
                                         }
                                     });
 
-
-
-
                                 }else {
                                     if (dataUpload_model.getIdUpload() != null){
                                         newData.add(dataUpload_model);
+
                                     }else {
                                         Toast.makeText(getActivity(), "Data belum ada", Toast.LENGTH_SHORT).show();
                                     }
@@ -222,7 +223,7 @@ public class HomeFragment extends Fragment  {
                            }
 
                            postListAdapter.addAll(newData);
-
+                            // saveData();
                            mPostList.setAdapter(postListAdapter);
                            isLoading = false;
 
@@ -321,6 +322,33 @@ public class HomeFragment extends Fragment  {
     }
 
 
+//    private void saveData(){
+//
+//      SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("shared prefences", MODE_PRIVATE);
+//      SharedPreferences.Editor editor = sharedPreferences.edit();
+//
+//      Gson gson = new Gson();
+//      String json = gson.toJson(newData);
+//      editor.putString("post list", json);
+//      editor.apply();
+//    }
+
+//    private void loadData(){
+//        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("sahred prefences", MODE_PRIVATE);
+//        Gson gson = new Gson();
+//        String json = sharedPreferences.getString("post list", null);
+//        Type type = new TypeToken<ArrayList<DataUpload_model>>(){}.getType();
+//        newData = gson.fromJson(json, type);
+//
+//
+//        if (newData == null){
+//
+//            newData = new ArrayList<>();
+//        }else {
+//            getPost();
+//        }
+//
+//    }
 
 }
 

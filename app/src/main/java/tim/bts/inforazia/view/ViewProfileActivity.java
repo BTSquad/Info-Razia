@@ -33,7 +33,6 @@ public class ViewProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_profile);
 
-
         databaseReference = FirebaseDatabase.getInstance().getReference().child("Users");
 
         user_image = findViewById(R.id.imageUserViewProfile);

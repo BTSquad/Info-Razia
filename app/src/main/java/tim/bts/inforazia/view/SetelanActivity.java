@@ -23,6 +23,7 @@ public class SetelanActivity extends AppCompatActivity {
     private ImageView back_btn, imageUser;
     private TextView namaUser;
 
+
     FirebaseUser firebaseUser;
     FirebaseAuth firebaseAuth;
 
@@ -33,6 +34,7 @@ public class SetelanActivity extends AppCompatActivity {
 
 
         LinearLayout setelanNotif = findViewById(R.id.setelan_notifikasi);
+        LinearLayout ubahKataSandi = findViewById(R.id.ubah_kataSandi);
         back_btn = findViewById(R.id.back);
         imageUser = findViewById(R.id.imageSetelanuser);
         namaUser = findViewById(R.id.namaSetelanUser);
@@ -45,6 +47,15 @@ public class SetelanActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(SetelanActivity.this, SetelanNotifikasiActivity.class);
                 intent.putExtra("uid", firebaseUser.getUid());
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        });
+
+        ubahKataSandi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SetelanActivity.this, UbahSandiActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }

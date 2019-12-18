@@ -66,7 +66,7 @@ public class LupaKataSandi extends AppCompatActivity {
     }
 
 
-    public static boolean ValidasiEmail(String email){
+    private static boolean ValidasiEmail(String email){
         boolean validasi;
         String emailPatern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
         String emailPattern2 = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+\\.+[a-z]+";

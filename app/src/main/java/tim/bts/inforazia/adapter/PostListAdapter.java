@@ -53,8 +53,6 @@ public class PostListAdapter extends RecyclerView.Adapter<PostListAdapter.PostVi
     private Context mContext;
     long  maxid_post = 1;
 
-
-
     public PostListAdapter(Context context){
         mContext = context;
         mUpload = new ArrayList<>();

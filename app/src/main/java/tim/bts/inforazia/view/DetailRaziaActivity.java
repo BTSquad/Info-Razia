@@ -80,7 +80,7 @@ public class DetailRaziaActivity extends AppCompatActivity {
         });
 
         interstitialIklan = new InterstitialAd(this);
-        interstitialIklan.setAdUnitId(ID_UNIT_TEST);
+        interstitialIklan.setAdUnitId(ID_UNIT_IKLAN_INTERESIAL);
 
         interstitialIklan.loadAd(new AdRequest.Builder().build());
 
@@ -201,7 +201,7 @@ public class DetailRaziaActivity extends AppCompatActivity {
         interstitialIklan.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
-                Toast.makeText(DetailRaziaActivity.this, "onAdLoaded()", Toast.LENGTH_SHORT).show();
+
                 tampilAds();
             }
 

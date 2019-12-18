@@ -173,7 +173,8 @@ public class PostSayaListAdapter extends RecyclerView.Adapter<PostSayaListAdapte
                                    {
                                        final DatabaseReference deleteDetailPost  = refHapus.child("detailPost").child(model.getUID()).child(model.getUID());
 
-                                       dsDelete.getRef().removeValue();
+                                       dsDelete.
+                                               getRef().removeValue();
                                        deleteDetailPost.removeValue();
                                        Toast.makeText(context, "Berhasil Menghapus Post", Toast.LENGTH_SHORT).show();
                                        alertDialog.dismiss();
