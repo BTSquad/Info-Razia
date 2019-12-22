@@ -19,11 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-
-
 import androidx.recyclerview.widget.RecyclerView;
-
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -35,13 +31,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-
 import java.util.List;
-
 import tim.bts.inforazia.R;
 import tim.bts.inforazia.model.DataUpload_model;
-
-import tim.bts.inforazia.model.Laporan_model;
 import tim.bts.inforazia.view.DetailRaziaActivity;
 import tim.bts.inforazia.view.ViewProfileActivity;
 
@@ -234,7 +226,7 @@ public class PostListAdapter extends RecyclerView.Adapter<PostListAdapter.PostVi
 
         final List<String> data = new ArrayList<>();
         data.add("Laporkan");
-        data.add("Share");
+        //data.add("Share");
 
         //Array Adapter
 

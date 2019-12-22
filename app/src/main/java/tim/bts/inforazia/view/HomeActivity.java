@@ -60,6 +60,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     TextView navNamaUser;
     TextView navEmailUser;
 
+    Users_model getUser;
+
     private boolean doubleClick = false;
 
     @Override
@@ -67,15 +69,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        if (!isConnected(HomeActivity.this)) {
-            buildDialog(HomeActivity.this).show();
-        }
-
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
 
-        cekUserLokasi(firebaseUser);
-
+        if (!isConnected(HomeActivity.this)) {
+            buildDialog(HomeActivity.this).show();
+        }
 
         //Google Sign In------------------------------------------------
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -99,6 +98,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
                 Intent intent = new Intent(HomeActivity.this, LaporRaziaActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
                 startActivity(intent);
             }
         });
@@ -126,6 +126,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
          navImageView =  headerView.findViewById(R.id.profile_image);
 
          loadUserInformation();
+         cekUserLokasi(firebaseUser);
     }
 
 
@@ -161,7 +162,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
 
         }else if (id == R.id.keluar){
-            FirebaseAuth.getInstance().signOut();;
+              FirebaseAuth.getInstance().signOut();;
               LoginManager.getInstance().logOut();
               mGoogleSignInClient.signOut();
 
@@ -185,8 +186,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         {
             mDrawerLayout.closeDrawer(GravityCompat.START);
         }else {
+
             Toast.makeText(this, "Tekan sekali lagi untuk keluar", Toast.LENGTH_SHORT).show();
         }
+
 
         if (doubleClick) {
             super.onBackPressed();
@@ -257,8 +260,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-
-
     public boolean isConnected(Context context) {
 
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -311,8 +312,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()){
-                    Users_model getUser = ds.getValue(Users_model.class);
+                     getUser = ds.getValue(Users_model.class);
 
+                    assert getUser != null;
                     if (getUser.getLokasiNotif().equals("Pilih Lokasi")){
 
                         AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
@@ -330,20 +332,22 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                                 }).setNegativeButton("Tidak Sekarang", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-
+                                dialog.dismiss();
                             }
                         });
 
-                         AlertDialog alertDialog = builder.create();
+                        final AlertDialog alertDialog = builder.create();
+                        int waktu_loading = 5000;
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                            alertDialog.show();
 
-                        alertDialog.show();
+                            }
+                        },waktu_loading);
 
                     }
-
-
-
                 }
-
             }
 
             @Override

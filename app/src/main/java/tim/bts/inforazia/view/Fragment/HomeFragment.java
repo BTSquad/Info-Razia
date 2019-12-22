@@ -1,9 +1,7 @@
 package tim.bts.inforazia.view.Fragment;
 
-
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -24,7 +22,6 @@ import android.view.ViewGroup;
 import androidx.appcompat.widget.SearchView;
 import android.widget.Toast;
 
-import com.facebook.share.Share;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,11 +31,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -50,7 +43,7 @@ import tim.bts.inforazia.model.DataUpload_model;
 
 import tim.bts.inforazia.view.SetelanActivity;
 
-import static android.content.Context.MODE_PRIVATE;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -61,7 +54,6 @@ public class HomeFragment extends Fragment  {
     private LinearLayoutManager manager;
     private PostListAdapter postListAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
-
     private DatabaseReference refDetail;
     private int totalItemLoad = 7;
     private int total_item = 0, last_visible_item;
@@ -69,6 +61,8 @@ public class HomeFragment extends Fragment  {
     private String last_node="", last_key="";
 
     List<DataUpload_model> newData;
+
+
 
     public HomeFragment() {
         // Required empty public constructor
@@ -91,8 +85,8 @@ public class HomeFragment extends Fragment  {
         manager = new LinearLayoutManager(getActivity());
         mPostList.setLayoutManager(manager);
 
-     manager.setReverseLayout(true);
-     manager.setStackFromEnd(true);
+         manager.setReverseLayout(true);
+         manager.setStackFromEnd(true);
 
         postListAdapter = new PostListAdapter(getContext());
         mPostList.setAdapter(postListAdapter);
@@ -140,10 +134,8 @@ public class HomeFragment extends Fragment  {
 
             if (TextUtils.isEmpty(last_node)) {
                 mPostView = refDetail.child("viewPost").orderByKey().limitToFirst(totalItemLoad);
-
             }else {
                 mPostView = refDetail.child("viewPost").orderByKey().startAt(last_node).limitToFirst(totalItemLoad);
-
             }
 
            mPostView.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -242,14 +234,9 @@ public class HomeFragment extends Fragment  {
            });
 
         }
-
-
         }
-
-
-
-        private void getLastKeyFromFirebase()
-        {
+        
+        private void getLastKeyFromFirebase() {
             Query getLastKey = refDetail.child("viewPost").orderByKey().limitToLast(1);
 
             getLastKey.addListenerForSingleValueEvent(new ValueEventListener() {

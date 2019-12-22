@@ -49,12 +49,17 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import id.zelory.compressor.Compressor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import tim.bts.inforazia.APIService;
@@ -162,6 +167,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 Intent intentBack = new Intent(LaporRaziaActivity.this, HomeActivity.class);
+                intentBack.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intentBack);
             }
         });
@@ -234,15 +240,6 @@ public class LaporRaziaActivity extends AppCompatActivity {
             cekUserLokasi();
         }
 
-        kotaKab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent pilihProvinsi = new Intent(LaporRaziaActivity.this, PilihLokasiActivity.class);
-                pilihProvinsi.putExtra("Activity", "ActivityLapor");
-                pilihProvinsi.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(pilihProvinsi);
-            }
-        });
 
         post.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -271,8 +268,6 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
            }
         });
-
-
 
     } @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
@@ -314,7 +309,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.TITLE, System.currentTimeMillis() + "NEW PRICTURE");
-        values.put(MediaStore.Images.Media.DESCRIPTION, "FROM CAMERA");
+        values.put(MediaStore.Images.Media.DESCRIPTION, System.currentTimeMillis() + "FROM CAMERA");
         imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
         // Intent Camera
         Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -323,18 +318,16 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
     }
 
-    private void pickImage(int requestCode, int resultCode, Intent data)
-    {
+    private void pickImage(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAMERA_REQUEST_PICK && resultCode == RESULT_OK)
         {
-            Uri fileUri = data.getData();
             try {
 
-                InputStream is = getContentResolver().openInputStream(fileUri);
+                InputStream is = getContentResolver().openInputStream(imageUri);
 
                 Bitmap bitmap = BitmapFactory.decodeStream(is);
                 fileDonelist.add(bitmap);
-                fileUriList.add(fileUri);
+                fileUriList.add(imageUri);
 
             }catch (Exception e){
                 e.printStackTrace();
@@ -394,8 +387,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
         }
     }
 
-
-    public String getFileName(Uri uri){
+    private String getFileName(Uri uri){
         String result = null;
         if (uri.getScheme().equals("content")){
             Cursor cursor = getContentResolver().query(uri , null, null, null, null);
@@ -417,9 +409,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
         return result;
     }
 
-
-    private void uploadGambar()
-    {
+    private void uploadGambar() {
         progressDialog.show();
 
         Query getLastCounter = databaseReference.orderByKey().limitToLast(1);
@@ -428,13 +418,9 @@ public class LaporRaziaActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                for (DataSnapshot ds : dataSnapshot.getChildren())
-                {
-
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     maxid_post = Long.parseLong(ds.getKey()) + 1;
-
                 }
-
             }
 
             @Override
@@ -452,79 +438,94 @@ public class LaporRaziaActivity extends AppCompatActivity {
                 imageUri = fileUriList.get(upload_count);
                 namaFileUpload = getFileName(imageUri);
 
+                try {
 
-                final StorageReference fileToupload = firebaseStorage.child("LaporRaziaImage").child(namaFileUpload);
+                    InputStream is = getContentResolver().openInputStream(imageUri);
 
-                final int finalUpload_count = upload_count;
+                    Bitmap bitmap = BitmapFactory.decodeStream(is);
 
-                fileToupload.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+                    byte[] final_image = baos.toByteArray();
 
-                        fileToupload.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                            @Override
-                            public void onSuccess(final Uri uri) {
 
-                                final String url = String.valueOf(uri);
+                    final StorageReference fileToupload = firebaseStorage.child("LaporRaziaImage").child(namaFileUpload);
 
-                                final String alamat = editLokasi.getText().toString().trim();
-                                String deskripsi = deskripsiPost.getText().toString().trim();
-                                String tanggal = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
-                                String waktu = new SimpleDateFormat("HH-mm-ss", Locale.getDefault()).format(new Date());
-                                firebaseAuth = FirebaseAuth.getInstance();
-                                firebaseUser = firebaseAuth.getCurrentUser();
-                                String UidUser = firebaseUser.getUid();
-                                final String userName = firebaseUser.getDisplayName();
-                                String photoUrl = firebaseUser.getPhotoUrl().toString();
+                    UploadTask uploadTask = fileToupload.putBytes(final_image);
 
-                                DataUpload_model data = new DataUpload_model(alamat, deskripsi, tanggal,
-                                        waktu, url, UidUser, userName, photoUrl,
-                                        uploadId, String.valueOf(maxid_post), "0");
 
-                                if (finalUpload_count < 1) {
+                    final int finalUpload_count = upload_count;
 
-                                    databaseReference.child(String.valueOf(maxid_post)).setValue(data);
-                                }
+                    uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                                final DatabaseReference simpanDetail = inputDetail.child(uploadId);
+                            fileToupload.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(final Uri uri) {
 
-                                final Upload_model upload_model = new Upload_model(url);
-                                simpanDetail.push().setValue(upload_model).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Toast.makeText(LaporRaziaActivity.this, "Upload Berhasil", Toast.LENGTH_SHORT).show();
-                                        progressDialog.dismiss();
-                                        fileUriList.clear();
+                                    final String url = String.valueOf(uri);
 
-                                        if (notify){
-                                            getUser(alamat, url);
-                                        }
-                                        notify = false;
-                                        Intent intent = new Intent(LaporRaziaActivity.this, HomeActivity.class);
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        startActivity(intent);
+                                    final String alamat = editLokasi.getText().toString().trim();
+                                    String deskripsi = deskripsiPost.getText().toString().trim();
+                                    String tanggal = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+                                    String waktu = new SimpleDateFormat("HH-mm-ss", Locale.getDefault()).format(new Date());
+                                    firebaseAuth = FirebaseAuth.getInstance();
+                                    firebaseUser = firebaseAuth.getCurrentUser();
+                                    String UidUser = firebaseUser.getUid();
+                                    final String userName = firebaseUser.getDisplayName();
+                                    String photoUrl = firebaseUser.getPhotoUrl().toString();
 
+                                    DataUpload_model data = new DataUpload_model(alamat, deskripsi, tanggal,
+                                            waktu, url, UidUser, userName, photoUrl,
+                                            uploadId, String.valueOf(maxid_post), "0");
+
+                                    if (finalUpload_count < 1) {
+
+                                        databaseReference.child(String.valueOf(maxid_post)).setValue(data);
                                     }
-                                });
 
-                            }
-                        });
+                                    final DatabaseReference simpanDetail = inputDetail.child(uploadId);
 
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(LaporRaziaActivity.this, "Gagal", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                                    final Upload_model upload_model = new Upload_model(url);
+                                    simpanDetail.push().setValue(upload_model).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Toast.makeText(LaporRaziaActivity.this, "Upload Berhasil", Toast.LENGTH_SHORT).show();
+                                            progressDialog.dismiss();
+                                            fileUriList.clear();
+
+                                            if (notify){
+                                                getUser(alamat, url);
+                                            }
+                                            notify = false;
+                                            Intent intent = new Intent(LaporRaziaActivity.this, HomeActivity.class);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            startActivity(intent);
+
+                                        }
+                                    });
+
+                                }
+                            });
+
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(LaporRaziaActivity.this, "Gagal", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
 
             }
-
     }
 
-
-    private void fetchlocation()
-    {
+    private void fetchlocation() {
 
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(LaporRaziaActivity.this,
@@ -539,9 +540,6 @@ public class LaporRaziaActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
                             Manifest.permission.ACCESS_COARSE_LOCATION},
                     MY_PERMISSIONS_REQUEST_COARSE_LOCATION);
-
-
-
         } else {
 
                 getLokasiTerakhir();
@@ -582,7 +580,6 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
     }
 
-
     private void getUser(final String alamat, final String url){
 
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
@@ -596,7 +593,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
                     assert users_model != null;
                     if (users_model.getLokasiNotif().contentEquals(kotaKab.getText()) && users_model.getNotif().equals("1")){
-                        sendNotifikasi(alamat, url, users_model.getUserId());
+                        sendNotifikasi(users_model.getLokasiNotif(), alamat, url, users_model.getUserId());
                     }
                 }
             }
@@ -608,8 +605,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
     }
 
-
-    private void sendNotifikasi(final String alamat, final String url, String uid){
+    private void sendNotifikasi(final String lokasiNotif, final String alamat, final String url, final String uid){
 
         DatabaseReference tokens = FirebaseDatabase.getInstance().getReference("tokens");
 
@@ -622,7 +618,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
                 {
                     Token token = ds.getValue(Token.class);
 
-                    Data data = new Data(firebaseUser.getUid(), url, alamat, "coba", ds.getKey());
+                    Data data = new Data(lokasiNotif, url, alamat, kotaKab.getText().toString(), uid);
 
                     Sender sender = new Sender(data, token.getToken());
 
@@ -648,14 +644,13 @@ public class LaporRaziaActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                Toast.makeText(LaporRaziaActivity.this, "Gagal " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
 
 
     }
-
 
     private void cekUserLokasi(){
 
@@ -710,5 +705,7 @@ public class LaporRaziaActivity extends AppCompatActivity {
         });
 
     }
+
+
 
 }

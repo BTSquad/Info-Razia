@@ -86,6 +86,7 @@ public class ProfileActivity extends AppCompatActivity {
         imageUser = findViewById(R.id.image_profile_user);
         namaUser = findViewById(R.id.namaUserProfile);
         updatePhoto_btn = findViewById(R.id.edit_PhotoProfile);
+
         ganti_nama = findViewById(R.id.ganti_nama_user);
 
         mListUpload = findViewById(R.id.recyclerView_userPost);
@@ -98,7 +99,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         manager.setReverseLayout(true);
         manager.setStackFromEnd(true);
-
 
         back_btn = findViewById(R.id.back);
 
@@ -172,8 +172,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
-    public void loadUserInformation(){
 
+    private void loadUserInformation(){
 
         if (firebaseUser != null) {
 
@@ -204,6 +204,7 @@ public class ProfileActivity extends AppCompatActivity {
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                
 
                 for (DataSnapshot ds : dataSnapshot.getChildren())
                 {
@@ -232,7 +233,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         String namaFileUpload = getFileName(fileUri);
 
-        final StorageReference fileToupload = firebaseStorage.child("PhotoUpdateUser").child(namaFileUpload);
+        final StorageReference fileToupload = firebaseStorage.child("PhotoUser").child(namaFileUpload);
         progressBar.setVisibility(View.VISIBLE);
         fileToupload.putFile(fileUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -262,6 +263,8 @@ public class ProfileActivity extends AppCompatActivity {
                                         }
                                     }
                                 });
+
+
                     }
                 });
 
@@ -302,7 +305,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         final DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
 
-        reference.orderByChild("userId").equalTo(firebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+        reference.orderByChild("userId").equalTo(firebaseUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists())
@@ -310,25 +313,15 @@ public class ProfileActivity extends AppCompatActivity {
                     for (final DataSnapshot ds : dataSnapshot.getChildren())
                     {
                         Users_model users_model = ds.getValue(Users_model.class);
+                        assert users_model != null;
+                        String checkUrl = users_model.getPhotoUser();
 
-                        StorageReference photoRef =
-                                FirebaseStorage.getInstance()
-                                        .getReferenceFromUrl(users_model.getPhotoUser());
 
-                        photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
+                        String key = ds.getKey();
+                        reference.child(key).child("photoUser").setValue(url);
 
-                                String key = ds.getKey();
-                                reference.child(key).child("photoUser").setValue(url).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        updateUserPost(url);
-                                    }
-                                });
+                        updateUserPost(url);
 
-                            }
-                        });
 
                     }
                 }else {
@@ -357,9 +350,9 @@ public class ProfileActivity extends AppCompatActivity {
                     for (DataSnapshot ds : dataSnapshot.getChildren())
                     {
                         String key = ds.getKey();
-
                         reference.child(key).child("photoUrlUser").setValue(url);
                         progressBar.setVisibility(View.INVISIBLE);
+                        dataUpload_models.clear();
                         Toast.makeText(ProfileActivity.this, "Photo Berhasil diubah", Toast.LENGTH_SHORT).show();
 
                     }
@@ -462,12 +455,14 @@ public class ProfileActivity extends AppCompatActivity {
 
                                                  Toast.makeText(ProfileActivity.this, "Nama berhasil di ganti", Toast.LENGTH_SHORT).show();
                                                  progressBar.setVisibility(View.INVISIBLE);
+                                                 refreshUser();
 
                                              }
-
                                          }else {
-                                             Toast.makeText(ProfileActivity.this, "Nama berhasil di ganti", Toast.LENGTH_SHORT).show();
+                                             Toast.makeText(ProfileActivity.this, "Nama gagal di ganti", Toast.LENGTH_SHORT).show();
                                              progressBar.setVisibility(View.INVISIBLE);
+
+
                                          }
                                      }
 
@@ -491,6 +486,32 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void hapusPhotoUser(String Url) {
+        StorageReference photoRef =
+                FirebaseStorage.getInstance()
+                        .getReferenceFromUrl(Url);
+
+        photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Toast.makeText(ProfileActivity.this, "Succses", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(ProfileActivity.this, "Gagal", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void refreshUser(){
+        if (firebaseUser.getDisplayName() != null) {
+            dataUpload_models.clear();
+            namaUser.setText(firebaseUser.getDisplayName());
+
+        }
     }
 
 }

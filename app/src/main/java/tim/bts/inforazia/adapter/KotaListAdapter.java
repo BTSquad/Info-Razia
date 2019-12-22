@@ -18,14 +18,14 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
+
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
 import tim.bts.inforazia.R;
 import tim.bts.inforazia.model.Kota_model;
-import tim.bts.inforazia.model.Provinsi_model;
+
 import tim.bts.inforazia.view.LaporRaziaActivity;
 import tim.bts.inforazia.view.SetelanNotifikasiActivity;
 
@@ -79,6 +79,7 @@ public class KotaListAdapter extends RecyclerView.Adapter<KotaListAdapter.KotaVi
                                         reference.child(key).child("lokasiNotif").setValue(kota_model.getValue());
 
                                         Intent intenNotifSetelan = new Intent(context, SetelanNotifikasiActivity.class);
+                                        intenNotifSetelan.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                         intenNotifSetelan.putExtra("uid", uid);
                                         context.startActivity(intenNotifSetelan);
                                     }

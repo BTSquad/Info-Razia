@@ -1,7 +1,5 @@
 package tim.bts.inforazia.notify;
 
-
-
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -17,8 +15,12 @@ import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -27,24 +29,37 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+
 import tim.bts.inforazia.R;
+import tim.bts.inforazia.model.Users_model;
 import tim.bts.inforazia.view.HomeActivity;
 
 public class NotifikasiService extends FirebaseMessagingService {
 
     FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
     private static final String CHANNEL_ID = "info-razia";
+    private Users_model users_model;
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+    }
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
         String sented = remoteMessage.getData().get("sented");
+        String kota = remoteMessage.getData().get("kota");
+        String lokasiUser = remoteMessage.getData().get("userLokasi");
 
         if (firebaseUser != null && sented.equals(firebaseUser.getUid()))
         {
-            tampilNotif(remoteMessage);
+            if (kota.equals(lokasiUser)){
+                tampilNotif(remoteMessage);
+            }
+
         }
 
 
@@ -73,30 +88,30 @@ public class NotifikasiService extends FirebaseMessagingService {
 
         createNotificationChannel();
 
-        String user = remoteMessage.getData().get("user");
+
         String icon = remoteMessage.getData().get("icon");
-        String title = remoteMessage.getData().get("title");
         String body = remoteMessage.getData().get("body");
 
-        RemoteMessage.Notification notification = remoteMessage.getNotification();
 
-        Intent intent = new Intent(this, HomeActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+            RemoteMessage.Notification notification = remoteMessage.getNotification();
 
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.pop_up_logo)
-                .setContentTitle("Silahkan lengkapi surat kendaraan anda")
-                .setContentText(body)
-                .setContentIntent(pendingIntent)
-                .setColor(getResources().getColor(R.color.primaryColor))
-                .setLargeIcon(getBitmapFromURL(icon))
-                // Set the intent that will fire when the user taps the notification
-                .setAutoCancel(true);
+            Intent intent = new Intent(this, HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
-        final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+            final NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setSmallIcon(R.drawable.pop_up_logo)
+                    .setContentTitle("Silahkan lengkapi surat kendaraan anda")
+                    .setContentText(body)
+                    .setContentIntent(pendingIntent)
+                    .setColor(getResources().getColor(R.color.primaryColor))
+                    .setLargeIcon(getBitmapFromURL(icon))
+                    // Set the intent that will fire when the user taps the notification
+                    .setAutoCancel(true);
 
-        notificationManager.notify(9999, builder.build());
+            final NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+            notificationManager.notify(9999, builder.build());
 
 
 
@@ -120,7 +135,7 @@ public class NotifikasiService extends FirebaseMessagingService {
 
 
 
-    public static Bitmap getBitmapFromURL(String src) {
+    private static Bitmap getBitmapFromURL(String src) {
         try {
             URL url = new URL(src);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -133,6 +148,35 @@ public class NotifikasiService extends FirebaseMessagingService {
             // Log exception
             return null;
         }
+    }
+
+    private void getUser(){
+
+
+        DatabaseReference db_ref =  FirebaseDatabase.getInstance().getReference("Users");
+
+        Query userGet = db_ref.orderByChild("userId").equalTo(firebaseUser.getUid());
+
+        userGet.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()){
+
+                     users_model = ds.getValue(Users_model.class);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+
+
     }
 
 

@@ -5,9 +5,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 
 import android.os.Handler;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -29,6 +32,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -179,20 +183,20 @@ public class MasukActivity extends AppCompatActivity {
         if (doubleClick) {
             super.onBackPressed();
             return;
+        }else {
+            progressBar.setVisibility(View.INVISIBLE);
         }
 
         this.doubleClick = true;
         Toast.makeText(this, "Tekan sekali lagi untuk keluar", Toast.LENGTH_SHORT).show();
 
-
         new Handler().postDelayed(new Runnable() {
-
             @Override
             public void run() {
+
                 doubleClick=false;
             }
         }, 2000);
-
 
     }
 
@@ -200,15 +204,11 @@ public class MasukActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-
         FirebaseUser firebaseUser = mAuth.getCurrentUser();
 
         if (firebaseUser != null && firebaseUser.isEmailVerified()){
             updateUI(firebaseUser);
         }
-
-
-
 
     }
 
@@ -219,11 +219,11 @@ public class MasukActivity extends AppCompatActivity {
         // Pass the activity result back to the Facebook SDK
         callbackManager.onActivityResult(requestCode, resultCode, data);
 
-
         if (requestCode == GOOGLE_SIGN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 // Google Sign In was successful, authenticate with Firebase
+                progressBar.setVisibility(View.INVISIBLE);
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
 
@@ -233,10 +233,10 @@ public class MasukActivity extends AppCompatActivity {
 
             }
         }
-
-
-
     }
+
+
+
 
     private void signIn(){
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
@@ -248,39 +248,41 @@ public class MasukActivity extends AppCompatActivity {
         Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
-
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            progressBar.setVisibility(View.INVISIBLE);
-                            // Sign in success, update UI with the signed-in user's information
+                           // Sign in success, update UI with the signed-in user's information
                             btnSignIn_google.setEnabled(true);
 
                             FirebaseUser currentUser = mAuth.getCurrentUser();
-
+                            progressBar.setVisibility(View.VISIBLE);
                             cekUserId(currentUser);
                             updateUI(currentUser);
 
-
                         } else {
                             // If sign in fails, display a message to the user.
+                            progressBar.setVisibility(View.INVISIBLE);
                             Toast.makeText(MasukActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
 
                          }
 
                         // ...
                     }
-                });
-
-
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                progressBar.setVisibility(View.INVISIBLE);
+            }
+        });
 
     }
 
     private void updateUI(FirebaseUser user){
 
         if (user != null){
+            progressBar.setVisibility(View.INVISIBLE);
 
             Intent intent = new Intent(MasukActivity.this, HomeActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -431,20 +433,16 @@ public class MasukActivity extends AppCompatActivity {
 
     private void simpanUserId(final FirebaseUser user){
 
-                DatabaseReference simpanUser = mDatabaseRef.child("Users").child(user.getUid());
+        DatabaseReference simpanUser = mDatabaseRef.child("Users").child(user.getUid());
 
-                Users_model users_model = new Users_model(user.getUid(),
-                        user.getDisplayName(),
-                        user.getEmail(),
-                        String.valueOf(user.getPhotoUrl())
-                        , "1", "Pilih Lokasi");
+        Users_model users_model = new Users_model(user.getUid(),
+                user.getDisplayName(),
+                user.getEmail(),
+                String.valueOf(user.getPhotoUrl())
+                , "1", "Pilih Lokasi");
 
-                simpanUser.setValue(users_model);
-
-
-
-            }
-            
+        simpanUser.setValue(users_model);
+    }
 
 
    }

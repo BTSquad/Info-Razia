@@ -25,6 +25,7 @@ public class PasalActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 Intent intentBack = new Intent(PasalActivity.this, HomeActivity.class);
+                intentBack.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intentBack);
             }
         });

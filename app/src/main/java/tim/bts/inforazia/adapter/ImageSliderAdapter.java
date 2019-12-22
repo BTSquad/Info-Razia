@@ -9,7 +9,6 @@ import android.widget.ImageView;
 
 import com.smarteist.autoimageslider.SliderViewAdapter;
 import com.squareup.picasso.Picasso;
-
 import java.util.List;
 
 import tim.bts.inforazia.R;

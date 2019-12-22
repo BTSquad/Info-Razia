@@ -2,30 +2,30 @@ package tim.bts.inforazia.notify;
 
 public class Data {
 
-    private String user;
+    private String userLokasi;
     private String icon;
     private String body;
-    private String title;
+    private String kota;
     private String sented;
 
     public Data(){
 
     }
 
-    public Data(String user, String icon, String body, String title, String sented) {
-        this.user = user;
+    public Data(String userLokasi, String icon, String body, String kota, String sented) {
+        this.userLokasi = userLokasi;
         this.icon = icon;
         this.body = body;
-        this.title = title;
+        this.kota = kota;
         this.sented = sented;
     }
 
     public String getUser() {
-        return user;
+        return userLokasi;
     }
 
     public void setUser(String user) {
-        this.user = user;
+        this.userLokasi = user;
     }
 
 
@@ -46,11 +46,11 @@ public class Data {
     }
 
     public String getTitle() {
-        return title;
+        return kota;
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        this.kota = title;
     }
 
     public String getSented() {

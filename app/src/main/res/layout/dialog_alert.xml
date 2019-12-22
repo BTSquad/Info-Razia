@@ -10,7 +10,7 @@
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:hint="@string/kataSandi"
+        android:hint="Nama Anda"
         android:layout_gravity="center_horizontal"
         >
 
