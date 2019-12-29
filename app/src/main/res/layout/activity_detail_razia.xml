@@ -6,21 +6,13 @@
     android:layout_height="match_parent"
     tools:context=".view.DetailRaziaActivity">
 
-
-    <ImageView
-        android:layout_width="320dp"
-        android:layout_height="70dp"
-        android:elevation="1dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/iklan"/>
-
-
-
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -180,7 +172,15 @@
                         android:layout_height="wrap_content"
                         android:text="-"
                         android:textColor="@color/primaryTextColor"
-                        android:textSize="12sp"/>
+                        android:textSize="12sp"
+                        android:layout_marginBottom="20dp"/>
+
+                    <ImageView
+                        android:layout_marginTop="20dp"
+                        android:layout_width="320dp"
+                        android:layout_height="70dp"
+                        android:layout_gravity="center_horizontal"
+                        android:background="@drawable/iklan"/>
 
 
 
@@ -193,6 +193,8 @@
 
 
 
+
+        </RelativeLayout>
     </ScrollView>
 
 </RelativeLayout>

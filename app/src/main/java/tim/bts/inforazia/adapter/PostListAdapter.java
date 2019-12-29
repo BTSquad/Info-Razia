@@ -30,6 +30,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import tim.bts.inforazia.R;
@@ -219,7 +220,6 @@ public class PostListAdapter extends RecyclerView.Adapter<PostListAdapter.PostVi
         }
     };
 
-
     private void more_alert(final String idUpload){
 
         ListView listView = new ListView(mContext);
@@ -303,7 +303,6 @@ public class PostListAdapter extends RecyclerView.Adapter<PostListAdapter.PostVi
 
     }
 
-
     private void  tambahLaporan(String idUpload, final AlertDialog alertDialog){
 
         final DatabaseReference reference = FirebaseDatabase.getInstance().getReference("viewPost");
@@ -334,5 +333,8 @@ public class PostListAdapter extends RecyclerView.Adapter<PostListAdapter.PostVi
         });
     }
 
+    public void removeLastItem(){
+        mUpload.remove(mUpload.size() - 1);
+    }
 
 }

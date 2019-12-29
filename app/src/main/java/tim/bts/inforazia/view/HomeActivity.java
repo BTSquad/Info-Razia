@@ -47,15 +47,13 @@ import tim.bts.inforazia.view.Fragment.HomeFragment;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
+    private FirebaseUser firebaseUser;
+    private FirebaseAuth firebaseAuth;
 
-    FirebaseUser firebaseUser;
-    FirebaseAuth firebaseAuth;
-
-    DrawerLayout mDrawerLayout;
+    private DrawerLayout mDrawerLayout;
     ActionBarDrawerToggle mDrawerToogle;
 
     GoogleSignInClient mGoogleSignInClient;
-
     CircleImageView navImageView;
     TextView navNamaUser;
     TextView navEmailUser;
@@ -279,20 +277,18 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
         AlertDialog.Builder builder = new AlertDialog.Builder(c);
         builder.setTitle("Anda Sedang Offline");
-        builder.setMessage("Tidak ada jaringan yang terhubung, Silahkan coba lagi nanti");
+        builder.setMessage("Tidak ada jaringan yang terhubung, Anda tidak bisa melihat postingan terbaru");
 
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                finish();
-                moveTaskToBack(true);
+                dialog.dismiss();
             }
         });
 
         return builder;
     }
-
 
     private void updateToken(String token){
 
@@ -300,7 +296,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         Token token1 = new Token(token);
         reference.child(firebaseUser.getUid()).setValue(token1);
     }
-
 
     private void cekUserLokasi(final FirebaseUser user){
 

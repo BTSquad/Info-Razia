@@ -21,7 +21,7 @@
         android:roundIcon="@drawable/re_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.UbahSandiActivity"></activity>
+        <activity android:name=".view.UbahSandiActivity"/>
         <activity android:name=".view.PilihLokasiActivity" />
         <activity android:name=".view.SetelanNotifikasiActivity" />
         <activity android:name=".view.ViewProfileActivity" />

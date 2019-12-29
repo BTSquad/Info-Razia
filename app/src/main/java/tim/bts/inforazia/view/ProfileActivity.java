@@ -42,6 +42,8 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.text.SimpleDateFormat;
@@ -233,49 +235,66 @@ public class ProfileActivity extends AppCompatActivity {
 
         String namaFileUpload = getFileName(fileUri);
 
-        final StorageReference fileToupload = firebaseStorage.child("PhotoUser").child(namaFileUpload);
-        progressBar.setVisibility(View.VISIBLE);
-        fileToupload.putFile(fileUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+        try {
 
-                fileToupload.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(final Uri uri) {
+            InputStream is = getContentResolver().openInputStream(fileUri);
 
-                        final String url = String.valueOf(uri);
+            Bitmap bitmap = BitmapFactory.decodeStream(is);
 
-                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                .setPhotoUri(Uri.parse(url))
-                                .build();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+            byte[] final_image = baos.toByteArray();
 
-                        firebaseUser.updateProfile(profileUpdates)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
+            final StorageReference fileToupload = firebaseStorage.child("PhotoUser").child(namaFileUpload);
+            UploadTask uploadTask = fileToupload.putBytes(final_image);
+            progressBar.setVisibility(View.VISIBLE);
 
-                                            updateUrlUser(url);
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                                        }else {
-                                            progressBar.setVisibility(View.INVISIBLE);
-                                            Toast.makeText(ProfileActivity.this, "Photo Gagal Diubah", Toast.LENGTH_SHORT).show();
+                    fileToupload.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(final Uri uri) {
+
+                            final String url = String.valueOf(uri);
+
+                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                    .setPhotoUri(Uri.parse(url))
+                                    .build();
+
+                            firebaseUser.updateProfile(profileUpdates)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+
+                                                updateUrlUser(url);
+
+                                            }else {
+                                                progressBar.setVisibility(View.INVISIBLE);
+                                                Toast.makeText(ProfileActivity.this, "Photo Gagal Diubah", Toast.LENGTH_SHORT).show();
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                        }
+                    });
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    progressBar.setVisibility(View.INVISIBLE);
+                    Toast.makeText(ProfileActivity.this, "Gagal mengupload", Toast.LENGTH_SHORT).show();
+                }
+            });
 
 
-                    }
-                });
+        }catch (IOException e){
+            e.printStackTrace();
+        }
 
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                progressBar.setVisibility(View.INVISIBLE);
-                Toast.makeText(ProfileActivity.this, "Gagal mengupload", Toast.LENGTH_SHORT).show();
-            }
-        });
+
 
     }
 

@@ -1,16 +1,12 @@
 package tim.bts.inforazia.view.Fragment;
 
 import android.content.Intent;
-
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
-
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,10 +14,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.appcompat.widget.SearchView;
 import android.widget.Toast;
-
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,17 +25,13 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-
 import java.util.ArrayList;
-
 import java.util.List;
-
 import tim.bts.inforazia.R;
-
 import tim.bts.inforazia.adapter.PostListAdapter;
 import tim.bts.inforazia.model.DataUpload_model;
-
 import tim.bts.inforazia.view.SetelanActivity;
+
 
 
 
@@ -60,8 +50,7 @@ public class HomeFragment extends Fragment  {
     private boolean isLoading = false, isMaxData = false;
     private String last_node="", last_key="";
 
-    List<DataUpload_model> newData;
-
+    private List<DataUpload_model> newData;
 
 
     public HomeFragment() {
@@ -91,7 +80,6 @@ public class HomeFragment extends Fragment  {
         postListAdapter = new PostListAdapter(getContext());
         mPostList.setAdapter(postListAdapter);
 
-        //loadData();
         getPost();
 
         mPostList.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -104,7 +92,9 @@ public class HomeFragment extends Fragment  {
 
                     if (!isLoading && total_item <= ((last_visible_item + totalItemLoad)))
                     {
+
                         getPost();
+                      //  saveData();
                         isLoading = true;
 
                     }
@@ -116,9 +106,15 @@ public class HomeFragment extends Fragment  {
          @Override
          public void onRefresh() {
 
-             getLastKeyFromFirebase();
-             getPost();
-             swipeRefreshLayout.setRefreshing(false);
+                if (newData.size() > 0){
+                    newData.clear();
+                }
+
+                getLastKeyFromFirebase();
+                getPost();
+                swipeRefreshLayout.setRefreshing(false);
+
+
          }
      });
 
@@ -141,12 +137,11 @@ public class HomeFragment extends Fragment  {
            mPostView.addListenerForSingleValueEvent(new ValueEventListener() {
                @Override
                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                   if (dataSnapshot.hasChildren())
-                   {
+                   if (dataSnapshot.hasChildren()) {
+
                         newData = new ArrayList<>();
 
-                       for (DataSnapshot ds : dataSnapshot.getChildren())
-                       {
+                       for (DataSnapshot ds : dataSnapshot.getChildren()) {
                                 final DataUpload_model dataUpload_model = ds.getValue(DataUpload_model.class);
 
                                 if (Integer.parseInt(dataUpload_model.getLaporan()) >= 30){
@@ -192,6 +187,7 @@ public class HomeFragment extends Fragment  {
                                     if (dataUpload_model.getIdUpload() != null){
                                         newData.add(dataUpload_model);
 
+
                                     }else {
                                         Toast.makeText(getActivity(), "Data belum ada", Toast.LENGTH_SHORT).show();
                                     }
@@ -215,7 +211,6 @@ public class HomeFragment extends Fragment  {
                            }
 
                            postListAdapter.addAll(newData);
-                            // saveData();
                            mPostList.setAdapter(postListAdapter);
                            isLoading = false;
 
@@ -235,7 +230,7 @@ public class HomeFragment extends Fragment  {
 
         }
         }
-        
+
         private void getLastKeyFromFirebase() {
             Query getLastKey = refDetail.child("viewPost").orderByKey().limitToLast(1);
 
@@ -308,32 +303,26 @@ public class HomeFragment extends Fragment  {
         }
     }
 
-
 //    private void saveData(){
 //
-//      SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("shared prefences", MODE_PRIVATE);
-//      SharedPreferences.Editor editor = sharedPreferences.edit();
+//        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("prefences", MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sharedPreferences.edit();
 //
 //      Gson gson = new Gson();
 //      String json = gson.toJson(newData);
 //      editor.putString("post list", json);
 //      editor.apply();
 //    }
-
+//
 //    private void loadData(){
-//        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("sahred prefences", MODE_PRIVATE);
+//        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("prefences", MODE_PRIVATE);
 //        Gson gson = new Gson();
 //        String json = sharedPreferences.getString("post list", null);
 //        Type type = new TypeToken<ArrayList<DataUpload_model>>(){}.getType();
 //        newData = gson.fromJson(json, type);
 //
-//
-//        if (newData == null){
-//
-//            newData = new ArrayList<>();
-//        }else {
-//            getPost();
-//        }
+//        postListAdapter.addAll(newData);
+//        mPostList.setAdapter(postListAdapter);
 //
 //    }
 

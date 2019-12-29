@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -49,14 +48,10 @@ public class DetailRaziaActivity extends AppCompatActivity {
 
     private TextView namaUser_detail, detail_lokasi, tanggalUpload, waktuUpload, deskripsiDetail;
     private ImageView userDetailPhoto;
-
     private static final String ID_UNIT_TEST = "ca-app-pub-3940256099942544/1033173712";
     private static final String ID_UNIT_IKLAN_INTERESIAL = "ca-app-pub-7973392951366806/4923011625";
 
-
     private InterstitialAd interstitialIklan;
-
-
     private String namauser;
     private String idupload;
     private String userId;
@@ -86,6 +81,7 @@ public class DetailRaziaActivity extends AppCompatActivity {
 
        //reqIklan();
         interesialAds();
+        tampilAds();
 
 
         //end ads----------------------------------------------------------------------------
@@ -98,7 +94,6 @@ public class DetailRaziaActivity extends AppCompatActivity {
         waktuUpload = findViewById(R.id.waktu_upload_detail);
         deskripsiDetail = findViewById(R.id.deskripsi_detail);
         userDetailPhoto = findViewById(R.id.user_upload_detail);
-
 
         userId = getIntent().getStringExtra("userId");
         idupload = getIntent().getStringExtra("uploadId");
@@ -162,10 +157,6 @@ public class DetailRaziaActivity extends AppCompatActivity {
             });
 
         }
-
-
-
-
     }
 
     private void setDetail(){
@@ -203,20 +194,19 @@ public class DetailRaziaActivity extends AppCompatActivity {
             public void onAdLoaded() {
 
                 tampilAds();
+
             }
 
             @Override
             public void onAdFailedToLoad(int errorCode) {
-                Toast.makeText(DetailRaziaActivity.this,
-                        "onAdFailedToLoad() with error code: " + errorCode,
-                        Toast.LENGTH_SHORT).show();
+                interstitialIklan.loadAd(new AdRequest.Builder().build());
             }
 
+            @Override
+            public void onAdClosed() {
 
+            }
         });
-
-
-
 
     }
 
@@ -227,16 +217,6 @@ public class DetailRaziaActivity extends AppCompatActivity {
             Toast.makeText(this, "Tidak ada iklan yang di tampilkan", Toast.LENGTH_SHORT).show();
 
         }
-    }
-
-
-    private void reqIklan()
-    {
-        if (!interstitialIklan.isLoading() && !interstitialIklan.isLoaded()) {
-            AdRequest adRequest = new AdRequest.Builder().build();
-            interstitialIklan.loadAd(adRequest);
-        }
-
     }
 
 
