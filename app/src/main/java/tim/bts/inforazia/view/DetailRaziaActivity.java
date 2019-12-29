@@ -213,9 +213,6 @@ public class DetailRaziaActivity extends AppCompatActivity {
     private void tampilAds(){
         if (interstitialIklan != null && interstitialIklan.isLoaded()) {
             interstitialIklan.show();
-        } else {
-            Toast.makeText(this, "Tidak ada iklan yang di tampilkan", Toast.LENGTH_SHORT).show();
-
         }
     }
 

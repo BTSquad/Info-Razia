@@ -127,7 +127,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
          cekUserLokasi(firebaseUser);
     }
 
-
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
@@ -175,8 +174,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-
-
     @Override
     public void onBackPressed() {
 
@@ -206,7 +203,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }, 2000);
 
     }
-
 
     public void loadUserInformation(){
 
@@ -258,7 +254,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    public boolean isConnected(Context context) {
+    private boolean isConnected(Context context) {
 
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netinfo = cm.getActiveNetworkInfo();
@@ -273,7 +269,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         return false;
     }
 
-    public AlertDialog.Builder buildDialog(Context c) {
+    private AlertDialog.Builder buildDialog(Context c) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(c);
         builder.setTitle("Anda Sedang Offline");

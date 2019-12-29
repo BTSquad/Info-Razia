@@ -1,8 +1,14 @@
 package tim.bts.inforazia.view.Fragment;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,6 +31,10 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import tim.bts.inforazia.R;
@@ -32,7 +42,7 @@ import tim.bts.inforazia.adapter.PostListAdapter;
 import tim.bts.inforazia.model.DataUpload_model;
 import tim.bts.inforazia.view.SetelanActivity;
 
-
+import static android.content.Context.MODE_PRIVATE;
 
 
 /**
@@ -51,7 +61,6 @@ public class HomeFragment extends Fragment  {
     private String last_node="", last_key="";
 
     private List<DataUpload_model> newData;
-
 
     public HomeFragment() {
         // Required empty public constructor
@@ -74,8 +83,8 @@ public class HomeFragment extends Fragment  {
         manager = new LinearLayoutManager(getActivity());
         mPostList.setLayoutManager(manager);
 
-         manager.setReverseLayout(true);
-         manager.setStackFromEnd(true);
+        manager.setReverseLayout(true);
+        manager.setStackFromEnd(true);
 
         postListAdapter = new PostListAdapter(getContext());
         mPostList.setAdapter(postListAdapter);
@@ -106,15 +115,38 @@ public class HomeFragment extends Fragment  {
          @Override
          public void onRefresh() {
 
-                if (newData.size() > 0){
-                    newData.clear();
-                }
+             if (isConnected(getContext())){
 
-                getLastKeyFromFirebase();
-                getPost();
-                swipeRefreshLayout.setRefreshing(false);
+                 if (isLoading){
+
+                     if (newData.size() > 0){
+                         newData.clear();
+
+                         isMaxData = false;
+                         last_node = postListAdapter.getLastItemId();
+                         postListAdapter.removeLastItem();
+                         postListAdapter.notifyDataSetChanged();
+
+                         getLastKeyFromFirebase();
+                         getPost();
+                         swipeRefreshLayout.setRefreshing(false);
+                     }else {
+
+                         getLastKeyFromFirebase();
+                         getPost();
+                         swipeRefreshLayout.setRefreshing(false);
+
+                     }
+                 }else {
+                     swipeRefreshLayout.setRefreshing(false);
+                 }
 
 
+             }else {
+                 swipeRefreshLayout.setRefreshing(false);
+                 buildDialog(getContext()).show();
+
+             }
          }
      });
 
@@ -303,17 +335,50 @@ public class HomeFragment extends Fragment  {
         }
     }
 
+    private boolean isConnected(Context context) {
+
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netinfo = cm.getActiveNetworkInfo();
+
+        if (netinfo != null && netinfo.isConnectedOrConnecting()) {
+            android.net.NetworkInfo wifi = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            android.net.NetworkInfo mobile = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+
+            if((mobile != null && mobile.isConnectedOrConnecting()) || (wifi != null && wifi.isConnectedOrConnecting())) return true;
+            else return false;
+        } else
+            return false;
+    }
+
+    private AlertDialog.Builder buildDialog(Context c) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(c);
+        builder.setTitle("Anda Sedang Offline");
+        builder.setMessage("Tidak ada jaringan yang terhubung, Anda tidak bisa melihat postingan terbaru");
+
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        return builder;
+    }
+
+
 //    private void saveData(){
 //
 //        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("prefences", MODE_PRIVATE);
 //        SharedPreferences.Editor editor = sharedPreferences.edit();
 //
-//      Gson gson = new Gson();
-//      String json = gson.toJson(newData);
-//      editor.putString("post list", json);
-//      editor.apply();
+//        Gson gson = new Gson();
+//        String json = gson.toJson(newData);
+//        editor.putString("post list", json);
+//        editor.apply();
 //    }
-//
+
 //    private void loadData(){
 //        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("prefences", MODE_PRIVATE);
 //        Gson gson = new Gson();
