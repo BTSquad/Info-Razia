@@ -11,3 +11,7 @@
 - Pasal-pasal 
 - Tentang
 - Post Razia
+- Setelan
+- Setelan Notifikasi
+- Detail Razia
+- Ubah Password
