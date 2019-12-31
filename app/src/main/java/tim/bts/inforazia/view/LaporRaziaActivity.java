@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,6 +20,8 @@ import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -244,32 +247,40 @@ public class LaporRaziaActivity extends AppCompatActivity {
         post.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                notify = true;
-                String alamat = editLokasi.getText().toString().trim();
-                String deskripsi = deskripsiPost.getText().toString().trim();
-                String kotaAtauKab = kotaKab.getText().toString().trim();
 
-                if (deskripsi.isEmpty())
-                {
-                    deskripsiPost.setError("Deskripsi Wajib Diisi");
-                }else if(alamat.isEmpty())
-                {
-                    editLokasi.setError("Silahkan Berikan lokasi Anda");
-                }else if(kotaAtauKab.isEmpty())
-                {
-                    kotaKab.setError("Pilih Kota Atau Kabupaten");
-                    Toast.makeText(LaporRaziaActivity.this, "Pilih Kota atau Kabupaten", Toast.LENGTH_SHORT).show();
-                }else if (fileUriList.size() <= 0){
-                    Toast.makeText(LaporRaziaActivity.this, "Anda belum mengupload gambar", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                uploadGambar();
+                if (!isConnected(LaporRaziaActivity.this)){
+                    buildDialog(LaporRaziaActivity.this).show();
+                }else {
+                    notify = true;
+                    String alamat = editLokasi.getText().toString().trim();
+                    String deskripsi = deskripsiPost.getText().toString().trim();
+                    String kotaAtauKab = kotaKab.getText().toString().trim();
+
+                    if (deskripsi.isEmpty())
+                    {
+                        deskripsiPost.setError("Deskripsi Wajib Diisi");
+                    }else if(alamat.isEmpty())
+                    {
+                        editLokasi.setError("Silahkan Berikan lokasi Anda");
+                    }else if(kotaAtauKab.isEmpty())
+                    {
+                        kotaKab.setError("Pilih Kota Atau Kabupaten");
+                        Toast.makeText(LaporRaziaActivity.this, "Pilih Kota atau Kabupaten", Toast.LENGTH_SHORT).show();
+                    }else if (fileUriList.size() <= 0){
+                        Toast.makeText(LaporRaziaActivity.this, "Anda belum mengupload gambar", Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                    uploadGambar();
+                    }
                 }
 
            }
         });
 
-    } @Override
+
+    }
+    @Override
+
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -704,6 +715,38 @@ public class LaporRaziaActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private boolean isConnected(Context context) {
+
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netinfo = cm.getActiveNetworkInfo();
+
+        if (netinfo != null && netinfo.isConnectedOrConnecting()) {
+            android.net.NetworkInfo wifi = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            android.net.NetworkInfo mobile = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+
+            if((mobile != null && mobile.isConnectedOrConnecting()) || (wifi != null && wifi.isConnectedOrConnecting())) return true;
+            else return false;
+        } else
+            return false;
+    }
+
+    private AlertDialog.Builder buildDialog(Context c) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(c);
+        builder.setTitle("Anda Sedang Offline");
+        builder.setMessage("Tidak ada jaringan yang terhubung, Anda tidak bisa melakukan post");
+
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        return builder;
     }
 
 

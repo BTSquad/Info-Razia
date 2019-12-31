@@ -32,9 +32,16 @@
             android:icon="@drawable/info2"/>
 
         <item
+            android:id="@+id/share"
+            android:title="Share"
+            android:icon="@drawable/ic_share"/>
+
+        <item
             android:id="@+id/keluar"
-            android:title="Keluar"
+            android:title="Logout"
             android:icon="@drawable/log_out"/>
+
+
 
 
 

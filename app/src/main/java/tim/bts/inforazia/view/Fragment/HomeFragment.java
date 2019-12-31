@@ -44,7 +44,6 @@ import tim.bts.inforazia.view.SetelanActivity;
 
 import static android.content.Context.MODE_PRIVATE;
 
-
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -319,15 +318,6 @@ public class HomeFragment extends Fragment  {
                     }
                 });
                 return true;
-
-            case R.id.my_post:
-
-                Toast.makeText(getActivity(), "Belum dibuat sabar lah", Toast.LENGTH_SHORT).show();
-
-
-                return true;
-
-
 
             default:
                 return super.onOptionsItemSelected(item);

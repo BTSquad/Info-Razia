@@ -5,11 +5,6 @@
     android:layout_height="wrap_content"
     android:id="@+id/pick_kota">
 
-    <View
-        android:layout_width="match_parent"
-        android:visibility="visible"
-        android:layout_height="1dp"
-        android:background="@color/secondaryColor"/>
 
     <TextView
         android:id="@+id/kota_lokasi"

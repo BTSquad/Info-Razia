@@ -167,6 +167,18 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
 
+        }else if (id == R.id.share){
+
+            Intent intentShareApp = new Intent(Intent.ACTION_SEND);
+            intentShareApp.setType("text/plain");
+            String shareBody = "https://play.google.com/store/apps/details?id=tim.bts.inforazia";
+            String shareSubject = "Solusi tertib berlalulintas";
+
+            intentShareApp.putExtra(Intent.EXTRA_TEXT, shareBody);
+            intentShareApp.putExtra(Intent.EXTRA_SUBJECT, shareSubject);
+
+            startActivity(Intent.createChooser(intentShareApp, "Share Aplikasi"));
+
         }
 
         mDrawerLayout.closeDrawer(GravityCompat.START);

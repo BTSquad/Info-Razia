@@ -6,12 +6,6 @@
     android:id="@+id/kotaOpen">
 
 
-    <View
-        android:layout_width="match_parent"
-        android:visibility="visible"
-        android:layout_height="1dp"
-        android:background="@color/secondaryColor"/>
-
     <TextView
         android:id="@+id/provinsi_lokasi"
         android:padding="10dp"

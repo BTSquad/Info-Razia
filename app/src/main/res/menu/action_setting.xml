@@ -9,12 +9,6 @@
         app:showAsAction="never"
         />
 
-    <item
-        android:id="@+id/my_post"
-        android:orderInCategory="100"
-        android:title="Postingan Saya"
-        app:showAsAction="never"
-        />
 
     <item
         android:id="@+id/pencarian"
