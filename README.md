@@ -1,17 +1,3 @@
 # Info-Razia
 ---------------------------------------------------
-# Login Firebase Authentication
-- Email Password
-- Facebook
-- Google
----------------------------------------------------
-# Layout
-- Home (Nav Drawer)
-- Profile
-- Pasal-pasal 
-- Tentang
-- Post Razia
-- Setelan
-- Setelan Notifikasi
-- Detail Razia
-- Ubah Password
+Link Demo : https://play.google.com/store/apps/details?id=tim.bts.inforazia
